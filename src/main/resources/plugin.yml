@@ -1,0 +1,10 @@
+name: ItemAttributes
+version: 1.0.0
+author: Himmelt
+main: org.soraworld.attrib.ItemAttributes
+depend: [Violet]
+website: https://github.com/Himmelt/ItemAttributes
+description: ItemAttributes Plugin.
+permissions:
+  attrib.admin:
+    default: op
