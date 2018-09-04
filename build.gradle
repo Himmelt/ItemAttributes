@@ -15,7 +15,8 @@ repositories {
 }
 
 dependencies {
-    compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
-    compile 'org.soraworld:violet-spigot:2.3.1'
+    compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
+    compile 'org.soraworld:violet-spigot:2.3.2'
+    compile files('lib/spigot-nms-all.jar')
     testCompile 'junit:junit:4.12'
 }
