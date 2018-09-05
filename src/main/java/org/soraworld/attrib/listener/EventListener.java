@@ -5,6 +5,8 @@ import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.util.Arrays;
@@ -26,6 +28,14 @@ public class EventListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
         updatePlayer(event.getPlayer());
+    }
+
+    public void onPlayerAttack(EntityDamageByEntityEvent event) {
+
+    }
+
+    public void onPlayerConsumeItem(PlayerItemConsumeEvent event) {
+
     }
 
     private static void updatePlayer(Player player) {

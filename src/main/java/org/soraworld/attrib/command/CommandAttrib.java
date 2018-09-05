@@ -14,141 +14,86 @@ import static org.soraworld.attrib.manager.AttribManager.*;
 
 public final class CommandAttrib {
 
+    /**
+     * 生命(整数)
+     * 建议使用位置：护甲
+     */
+    @Sub(perm = "admin", onlyPlayer = true, aliases = {"hp"}, usage = "/attrib health|hp [health]")
+    public static void health(SpigotCommand self, CommandSender sender, Paths args) {
+        getSetInt((AttribManager) self.manager, (Player) sender, args,
+                "Health", "health", 0, Integer.MAX_VALUE);
+    }
 
+    /*
+     * 速度(比例%)
+     * 建议使用位置：全部
+     */
+    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib speed [speed]")
+    public static void speed(SpigotCommand self, CommandSender sender, Paths args) {
+        getSetInt((AttribManager) self.manager, (Player) sender, args,
+                "Speed", "speed", 0, Integer.MAX_VALUE);
+    }
+
+    /*
+     * 攻击(整数)
+     * 建议使用位置：武器
+     */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib attack [damage]")
     public static void attack(SpigotCommand self, CommandSender sender, Paths args) {
-        AttribManager manager = (AttribManager) self.manager;
-        Player player = (Player) sender;
-        ItemStack stack = player.getItemInHand();
-        if (stack != null && stack.getType() != Material.AIR) {
-            NBTTagCompound tag = getTag(stack);
-            if (args.notEmpty()) {
-                try {
-                    int damage = Integer.valueOf(args.first());
-                    if (tag == null) {
-                        tag = new NBTTagCompound();
-                        setTag(stack, tag);
-                    }
-                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
-                    attribs.setInt("attack", damage);
-                    tag.set(ATTRIBS, attribs);
-                    manager.sendKey(player, "setAttack", damage);
-                    if (manager.autoUpdate) updateLore(stack);
-                } catch (NumberFormatException ignored) {
-                    manager.sendKey(player, "invalidInt");
-                } catch (Throwable ignored) {
-                    manager.sendKey(player, "nbtError");
-                }
-            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-                int damage = tag.getCompound(ATTRIBS).getInt("attack");
-                manager.sendKey(player, "getAttack", damage);
-            } else manager.sendKey(player, "noTag");
-        } else manager.sendKey(player, "emptyHand");
+        getSetInt((AttribManager) self.manager, (Player) sender, args,
+                "Attack", "attack", 0, Integer.MAX_VALUE);
     }
 
+    /*
+     * 免疫击退(概率%)
+     * 建议使用位置：护甲
+     */
+    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib knock [knock]")
+    public static void knock(SpigotCommand self, CommandSender sender, Paths args) {
+        getSetInt((AttribManager) self.manager, (Player) sender, args,
+                "Knock", "knock", 0, 100);
+    }
+
+    /*
+     * 护甲/防御(整数)
+     * 建议使用位置：护甲
+     */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib armor [armor]")
     public static void armor(SpigotCommand self, CommandSender sender, Paths args) {
-        AttribManager manager = (AttribManager) self.manager;
-        Player player = (Player) sender;
-        ItemStack stack = player.getItemInHand();
-        if (stack != null && stack.getType() != Material.AIR) {
-            NBTTagCompound tag = getTag(stack);
-            if (args.notEmpty()) {
-                try {
-                    int armor = Integer.valueOf(args.first());
-                    if (tag == null) {
-                        tag = new NBTTagCompound();
-                        setTag(stack, tag);
-                    }
-                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
-                    attribs.setInt("armor", armor);
-                    tag.set(ATTRIBS, attribs);
-                    manager.sendKey(player, "setArmor", armor);
-                    if (manager.autoUpdate) updateLore(stack);
-                } catch (NumberFormatException ignored) {
-                    manager.sendKey(player, "invalidInt");
-                } catch (Throwable ignored) {
-                    manager.sendKey(player, "nbtError");
-                }
-            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-                int armor = tag.getCompound(ATTRIBS).getInt("armor");
-                manager.sendKey(player, "getArmor", armor);
-            } else manager.sendKey(player, "noTag");
-        } else manager.sendKey(player, "emptyHand");
+        getSetInt((AttribManager) self.manager, (Player) sender, args,
+                "Armor", "armor", 0, Integer.MAX_VALUE);
     }
 
+    /*
+     * 格挡
+     * 建议使用位置：护甲
+     */
+    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib block [chance] [ratio]")
+    public static void block(SpigotCommand self, CommandSender sender, Paths args) {
+        getSetInt2((AttribManager) self.manager, (Player) sender, args, "Block",
+                "block-chance", "block-ratio", 0, 100, 0, 100);
+    }
+
+    /*
+     * 闪避(概率%)
+     * 可配置是否叠加闪避几率，如果不叠加就使用最高几率。
+     * 建议位置：全部
+     */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib dodge [dodge]")
     public static void dodge(SpigotCommand self, CommandSender sender, Paths args) {
-        AttribManager manager = (AttribManager) self.manager;
-        Player player = (Player) sender;
-        ItemStack stack = player.getItemInHand();
-        if (stack != null && stack.getType() != Material.AIR) {
-            NBTTagCompound tag = getTag(stack);
-            if (args.notEmpty()) {
-                try {
-                    int dodge = Integer.valueOf(args.first());
-                    if (tag == null) {
-                        tag = new NBTTagCompound();
-                        setTag(stack, tag);
-                    }
-                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
-                    attribs.setInt("dodge", dodge);
-                    tag.set(ATTRIBS, attribs);
-                    manager.sendKey(player, "setDodge", dodge);
-                    if (manager.autoUpdate) updateLore(stack);
-                } catch (NumberFormatException ignored) {
-                    manager.sendKey(player, "invalidInt");
-                } catch (Throwable ignored) {
-                    manager.sendKey(player, "nbtError");
-                }
-            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-                int dodge = tag.getCompound(ATTRIBS).getInt("dodge");
-                manager.sendKey(player, "getDodge", dodge);
-            } else manager.sendKey(player, "noTag");
-        } else manager.sendKey(player, "emptyHand");
+        getSetInt((AttribManager) self.manager, (Player) sender, args,
+                "Dodge", "dodge", 0, 100);
     }
 
-
-    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib crit [chance] [time]")
+    /*
+     * 暴击(概率%)
+     * 建议位置：武器
+     */
+    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib crit [chance] [ratio]")
     public static void crit(SpigotCommand self, CommandSender sender, Paths args) {
-        AttribManager manager = (AttribManager) self.manager;
-        Player player = (Player) sender;
-        ItemStack stack = player.getItemInHand();
-        if (stack != null && stack.getType() != Material.AIR) {
-            NBTTagCompound tag = getTag(stack);
-            if (args.notEmpty()) {
-                try {
-                    float chance = Float.valueOf(args.first());
-                    chance = chance < 0 ? 0 : chance > 1 ? 1 : chance;
-                    float time = 1;
-                    try {
-                        time = Float.valueOf(args.get(1));
-                    } catch (Throwable ignored) {
-                    }
-                    time = time < 1 ? 1 : time;
-                    if (tag == null) {
-                        tag = new NBTTagCompound();
-                        setTag(stack, tag);
-                    }
-                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
-                    attribs.setFloat("crit-chance", chance);
-                    attribs.setFloat("crit-time", time);
-                    tag.set(ATTRIBS, attribs);
-                    manager.sendKey(player, "setCrit", chance, time);
-                    if (manager.autoUpdate) updateLore(stack);
-                } catch (NumberFormatException ignored) {
-                    manager.sendKey(player, "invalidInt");
-                } catch (Throwable ignored) {
-                    manager.sendKey(player, "nbtError");
-                }
-            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-                float chance = tag.getCompound(ATTRIBS).getFloat("crit-chance");
-                float time = tag.getCompound(ATTRIBS).getFloat("crit-time");
-                manager.sendKey(player, "getCrit", chance, time);
-            } else manager.sendKey(player, "noTag");
-        } else manager.sendKey(player, "emptyHand");
+        getSetInt2((AttribManager) self.manager, (Player) sender, args, "Crit",
+                "crit-chance", "crit-ratio", 0, 100, 100, Integer.MAX_VALUE);
     }
-
 
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib update")
     public static void update(SpigotCommand self, CommandSender sender, Paths args) {
@@ -157,6 +102,68 @@ public final class CommandAttrib {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             updateLore(stack);
+        } else manager.sendKey(player, "emptyHand");
+    }
+
+    private static void getSetInt(AttribManager manager, Player player, Paths args, String Name, String name, int min, int max) {
+        ItemStack stack = player.getItemInHand();
+        if (stack != null && stack.getType() != Material.AIR) {
+            NBTTagCompound tag = getTag(stack);
+            if (args.notEmpty()) {
+                try {
+                    int value = Integer.valueOf(args.first());
+                    value = value < min ? min : value > max ? max : value;
+                    if (tag == null) {
+                        tag = new NBTTagCompound();
+                        setTag(stack, tag);
+                    }
+                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
+                    attribs.setInt(name, value);
+                    tag.set(ATTRIBS, attribs);
+                    manager.sendKey(player, "set" + Name, value);
+                    if (manager.isAutoUpdate()) updateLore(stack);
+                } catch (NumberFormatException ignored) {
+                    manager.sendKey(player, "invalidInt");
+                } catch (Throwable ignored) {
+                    manager.sendKey(player, "nbtError");
+                }
+            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
+                int value = tag.getCompound(ATTRIBS).getInt(name);
+                manager.sendKey(player, "get" + Name, value);
+            } else manager.sendKey(player, "noTag");
+        } else manager.sendKey(player, "emptyHand");
+    }
+
+    private static void getSetInt2(AttribManager manager, Player player, Paths args, String Name, String name1, String name2, int min1, int max1, int min2, int max2) {
+        ItemStack stack = player.getItemInHand();
+        if (stack != null && stack.getType() != Material.AIR) {
+            NBTTagCompound tag = getTag(stack);
+            if (args.notEmpty()) {
+                try {
+                    int value1 = Integer.valueOf(args.get(0));
+                    int value2 = Integer.valueOf(args.get(1));
+                    value1 = value1 < min1 ? min1 : value1 > max1 ? max1 : value1;
+                    value2 = value2 < min2 ? min2 : value2 > max2 ? max2 : value2;
+                    if (tag == null) {
+                        tag = new NBTTagCompound();
+                        setTag(stack, tag);
+                    }
+                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
+                    attribs.setInt(name1, value1);
+                    attribs.setInt(name2, value2);
+                    tag.set(ATTRIBS, attribs);
+                    manager.sendKey(player, "set" + Name, value1, value2);
+                    if (manager.isAutoUpdate()) updateLore(stack);
+                } catch (NumberFormatException ignored) {
+                    manager.sendKey(player, "invalidInt");
+                } catch (Throwable ignored) {
+                    manager.sendKey(player, "nbtError");
+                }
+            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
+                int value1 = tag.getCompound(ATTRIBS).getInt(name1);
+                int value2 = tag.getCompound(ATTRIBS).getInt(name2);
+                manager.sendKey(player, "get" + Name, value1, value2);
+            } else manager.sendKey(player, "noTag");
         } else manager.sendKey(player, "emptyHand");
     }
 }

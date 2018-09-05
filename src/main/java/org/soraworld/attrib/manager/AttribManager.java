@@ -45,8 +45,12 @@ public class AttribManager extends SpigotManager {
         support = _support;
     }
 
-    @Setting
-    public boolean autoUpdate = false;
+    @Setting(comment = "comment.autoUpdate")
+    private boolean autoUpdate = false;
+    @Setting(comment = "comment.accumulateDodge")
+    private boolean accumulateDodge = false;
+    @Setting(comment = "comment.accumulateBlock")
+    private boolean accumulateBlock = false;
 
     public AttribManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
@@ -81,6 +85,7 @@ public class AttribManager extends SpigotManager {
     }
 
     public static void updateLore(ItemStack stack) {
+        // TODO will
         NBTTagCompound tag = getTag(stack);
         if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
             NBTTagCompound attribs = tag.getCompound(ATTRIBS);
@@ -88,5 +93,24 @@ public class AttribManager extends SpigotManager {
             // TODO add attribs
             stack.getItemMeta().setLore(lore);
         }
+    }
+
+    /**
+     * 是否自动更新物品Lore.
+     *
+     * @return 是否自动更新
+     */
+    public boolean isAutoUpdate() {
+        return autoUpdate;
+    }
+
+    /**
+     * 是否累积装备闪避几率.
+     * 如果不累积，则使用最大的几率.
+     *
+     * @return 是否累积
+     */
+    public boolean isAccumulateDodge() {
+        return accumulateDodge;
     }
 }
