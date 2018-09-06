@@ -1,5 +1,6 @@
 package org.soraworld.attrib.manager;
 
+import net.minecraft.server.v1_7_R4.EntityPlayer;
 import net.minecraft.server.v1_7_R4.NBTTagCompound;
 import org.bukkit.craftbukkit.v1_7_R4.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
@@ -77,6 +78,26 @@ public class AttribManager extends SpigotManager {
         }
     }
 
+    /**
+     * 是否自动更新物品Lore.
+     *
+     * @return 是否自动更新
+     */
+    public boolean isAutoUpdate() {
+        return autoUpdate;
+    }
+
+    /**
+     * 是否累积装备闪避几率.
+     * 如果不累积，则使用最大的几率.
+     *
+     * @return 是否累积
+     */
+    public boolean isAccumulateDodge() {
+        return accumulateDodge;
+    }
+
+
     public static void setTag(org.bukkit.inventory.ItemStack stack, NBTTagCompound tag) {
         try {
             ((net.minecraft.server.v1_7_R4.ItemStack) handle.get(stack)).tag = tag;
@@ -95,22 +116,7 @@ public class AttribManager extends SpigotManager {
         }
     }
 
-    /**
-     * 是否自动更新物品Lore.
-     *
-     * @return 是否自动更新
-     */
-    public boolean isAutoUpdate() {
-        return autoUpdate;
-    }
-
-    /**
-     * 是否累积装备闪避几率.
-     * 如果不累积，则使用最大的几率.
-     *
-     * @return 是否累积
-     */
-    public boolean isAccumulateDodge() {
-        return accumulateDodge;
+    public boolean isHoldingRight(EntityPlayer player) {
+        return player.by();
     }
 }

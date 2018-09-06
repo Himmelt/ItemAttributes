@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.util.Arrays;
@@ -27,7 +28,11 @@ public class EventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
-        updatePlayer(event.getPlayer());
+        //updatePlayer(event.getPlayer());
+    }
+
+    public void on(PlayerItemHeldEvent event) {
+
     }
 
     public void onPlayerAttack(EntityDamageByEntityEvent event) {
@@ -62,21 +67,21 @@ public class EventListener implements Listener {
         AttributeModifier maxHealthModifier = new AttributeModifier(maxHealthUUID, "maxHealth", maxHealth, 0);
         AttributeInstance attrib = handle.getAttributeInstance(GenericAttributes.maxHealth);
         attrib.b(maxHealthModifier);// remove
-        if (maxHealth > 0) attrib.a(maxHealthModifier);// apply
+        if (maxHealth != 0) attrib.a(maxHealthModifier);// apply
 
         AttributeModifier moveSpeedModifier = new AttributeModifier(moveSpeedUUID, "moveSpeed", moveSpeed, 0);
         attrib = handle.getAttributeInstance(GenericAttributes.d);// movementSpeed
         attrib.b(moveSpeedModifier);// remove
-        if (moveSpeed > 0) attrib.a(moveSpeedModifier);// apply
+        if (moveSpeed != 0) attrib.a(moveSpeedModifier);// apply
 
         AttributeModifier attackDamageModifier = new AttributeModifier(attackDamageUUID, "attackDamage", attackDamage, 0);
         attrib = handle.getAttributeInstance(GenericAttributes.e);// attackDamage
         attrib.b(attackDamageModifier);// remove
-        if (attackDamage > 0) attrib.a(attackDamageModifier);// apply
+        if (attackDamage != 0) attrib.a(attackDamageModifier);// apply
 
         AttributeModifier knockResistModifier = new AttributeModifier(knockResistUUID, "knockResist", knockResist, 0);
         attrib = handle.getAttributeInstance(GenericAttributes.c);// knockbackResistance
         attrib.b(knockResistModifier);// remove
-        if (knockResist > 0) attrib.a(knockResistModifier);// apply
+        if (knockResist != 0) attrib.a(knockResistModifier);// apply
     }
 }
