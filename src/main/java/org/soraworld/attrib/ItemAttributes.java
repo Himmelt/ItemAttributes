@@ -1,8 +1,11 @@
 package org.soraworld.attrib;
 
 import org.bukkit.event.Listener;
+import org.soraworld.attrib.command.CommandAttrib;
 import org.soraworld.attrib.listener.EventListener;
 import org.soraworld.attrib.manager.AttribManager;
+import org.soraworld.violet.command.SpigotBaseSubs;
+import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.SpigotManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
 
@@ -25,7 +28,18 @@ public class ItemAttributes extends SpigotPlugin {
 
     @Nullable
     protected List<Listener> registerListeners() {
-        return Collections.singletonList(new EventListener());
+        return Collections.singletonList(new EventListener((AttribManager) manager));
+    }
+
+    protected void registerCommands() {
+        SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager);
+        command.extractSub(SpigotBaseSubs.class, "lang");
+        command.extractSub(SpigotBaseSubs.class, "debug");
+        command.extractSub(SpigotBaseSubs.class, "save");
+        command.extractSub(SpigotBaseSubs.class, "reload");
+        command.extractSub(SpigotBaseSubs.class, "help");
+        command.extractSub(CommandAttrib.class);
+        register(this, command);
     }
 
     @Nonnull

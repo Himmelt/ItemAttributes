@@ -1,21 +1,25 @@
 package org.soraworld.attrib.listener;
 
 import net.minecraft.server.v1_7_R4.*;
+import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.inventory.PlayerInventory;
+import org.soraworld.attrib.manager.AttribManager;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.soraworld.attrib.manager.AttribManager.ATTRIBS;
-import static org.soraworld.attrib.manager.AttribManager.TAG_COMP;
+import static org.soraworld.attrib.manager.AttribManager.*;
 
 public class EventListener implements Listener {
 
@@ -26,12 +30,65 @@ public class EventListener implements Listener {
 
     private static long last = System.currentTimeMillis();
 
+    private final AttribManager manager;
+
+    public EventListener(AttribManager manager) {
+        this.manager = manager;
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
         //updatePlayer(event.getPlayer());
     }
 
     public void on(PlayerItemHeldEvent event) {
+
+    }
+
+    /**
+     * 当玩家右键装备护甲时更新属性.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        System.out.println(event.getAction());
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
+            System.out.println(event.hasItem());
+            System.out.println(event.getItem());
+            Item item = getNMSItem(event.getItem());
+            System.out.println(item);
+            if (event.hasItem() && getNMSItem(event.getItem()) instanceof ItemArmor) {
+                Bukkit.getScheduler().runTask(manager.getPlugin(), () -> updatePlayer(event.getPlayer()));
+            }
+        }
+    }
+
+    /**
+     * 当玩家操作护甲时更新属性.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerInventoryClick(InventoryClickEvent event) {
+        if (event.getClickedInventory() instanceof PlayerInventory) {
+            if (getNMSItem(event.getCurrentItem()) instanceof ItemArmor) {
+                Bukkit.getScheduler().runTask(manager.getPlugin(), () -> updatePlayer((Player) event.getWhoClicked()));
+            }
+        }
+    }
+
+    @EventHandler
+    public void on(InventoryCloseEvent event) {
+        System.out.println("InventoryCloseEvent");
+        if (event.getInventory() instanceof PlayerInventory) {
+            //updatePlayer((Player) event.getPlayer());
+        }
+    }
+
+    /**
+     * 护甲损坏时更新属性.
+     *
+     * @param event the event
+     */
+    @EventHandler
+    public void on(PlayerItemDamageEvent event) {
 
     }
 

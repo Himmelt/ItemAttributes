@@ -4,6 +4,7 @@ import net.minecraft.server.v1_7_R4.EntityPlayer;
 import net.minecraft.server.v1_7_R4.NBTTagCompound;
 import org.bukkit.craftbukkit.v1_7_R4.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
+import org.soraworld.attrib.data.Attributes;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.manager.SpigotManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
@@ -13,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AttribManager extends SpigotManager {
 
@@ -32,6 +34,10 @@ public class AttribManager extends SpigotManager {
 
     private static final Field handle;
     private static final boolean support;
+
+    @Setting
+    private HashMap<Integer, Attributes> items = new HashMap<>();
+    private HashMap<String, Integer> ids = new HashMap<>();
 
     static {
         Field _handle = null;
@@ -65,6 +71,14 @@ public class AttribManager extends SpigotManager {
     public static net.minecraft.server.v1_7_R4.ItemStack getNMStack(org.bukkit.inventory.ItemStack stack) {
         try {
             return (net.minecraft.server.v1_7_R4.ItemStack) handle.get(stack);
+        } catch (Throwable ignored) {
+            return null;
+        }
+    }
+
+    public static net.minecraft.server.v1_7_R4.Item getNMSItem(org.bukkit.inventory.ItemStack stack) {
+        try {
+            return ((net.minecraft.server.v1_7_R4.ItemStack) handle.get(stack)).getItem();
         } catch (Throwable ignored) {
             return null;
         }
