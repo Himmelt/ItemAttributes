@@ -1,16 +1,19 @@
 package org.soraworld.attrib.command;
 
-import net.minecraft.server.v1_7_R4.NBTTagCompound;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.soraworld.attrib.data.Attributes;
 import org.soraworld.attrib.manager.AttribManager;
 import org.soraworld.violet.command.Paths;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.command.Sub;
 
-import static org.soraworld.attrib.manager.AttribManager.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
+import static org.soraworld.attrib.manager.AttribManager.updateLore;
 
 public final class CommandAttrib {
 
@@ -21,8 +24,14 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, aliases = {"hp"}, usage = "/attrib health|hp [health]")
     public static void health(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt((AttribManager) self.manager, (Player) sender, args,
-                "Health", "health", 0, Integer.MAX_VALUE);
+        getSetInt(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Health",
+                0, Integer.MAX_VALUE,
+                (attrib, value) -> attrib.health = value,
+                attrib -> attrib.health
+        );
     }
 
     /**
@@ -32,8 +41,14 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib regain [value]")
     public static void regain(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetFloat((AttribManager) self.manager, (Player) sender, args,
-                "Heal", "heal", 0, Float.MAX_VALUE);
+        getSetFloat(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Regain",
+                0, Float.MAX_VALUE,
+                (attrib, value) -> attrib.regain = value,
+                attrib -> attrib.regain
+        );
     }
 
     /**
@@ -42,8 +57,14 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib walkspeed [speed]")
     public static void walkspeed(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt((AttribManager) self.manager, (Player) sender, args,
-                "WalkSpeed", "walkspeed", 0, Integer.MAX_VALUE);
+        getSetFloat(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "WalkSpeed",
+                0, Float.MAX_VALUE,
+                (attrib, value) -> attrib.walkspeed = value,
+                attrib -> attrib.walkspeed
+        );
     }
 
     /**
@@ -52,8 +73,14 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib flyspeed [speed]")
     public static void flyspeed(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt((AttribManager) self.manager, (Player) sender, args,
-                "FlySpeed", "flyspeed", 0, Integer.MAX_VALUE);
+        getSetFloat(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "FlySpeed",
+                0, Float.MAX_VALUE,
+                (attrib, value) -> attrib.flyspeed = value,
+                attrib -> attrib.flyspeed
+        );
     }
 
     /**
@@ -62,8 +89,14 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib attack [damage]")
     public static void attack(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt((AttribManager) self.manager, (Player) sender, args,
-                "Attack", "attack", 0, Integer.MAX_VALUE);
+        getSetInt(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Attack",
+                0, Integer.MAX_VALUE,
+                (attrib, value) -> attrib.attack = value,
+                attrib -> attrib.attack
+        );
     }
 
     /**
@@ -72,8 +105,14 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib knock [knock]")
     public static void knock(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt((AttribManager) self.manager, (Player) sender, args,
-                "Knock", "knock", 0, 100);
+        getSetInt(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Knock",
+                0, 100,
+                (attrib, value) -> attrib.knock = value / 100.0F,
+                attrib -> (int) (attrib.knock * 100)
+        );
     }
 
     /**
@@ -82,8 +121,14 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib armor [armor]")
     public static void armor(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt((AttribManager) self.manager, (Player) sender, args,
-                "Armor", "armor", 0, Integer.MAX_VALUE);
+        getSetInt(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Armor",
+                0, Integer.MAX_VALUE,
+                (attrib, value) -> attrib.armor = value,
+                attrib -> attrib.armor
+        );
     }
 
     /**
@@ -92,8 +137,16 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib block [chance%] [ratio%]")
     public static void block(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt2((AttribManager) self.manager, (Player) sender, args, "Block",
-                "block-chance", "block-ratio", 0, 100, 0, 100);
+        getSetInt2(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Block",
+                0, 100, 0, 100,
+                (attrib, value) -> attrib.block_chance = value / 100.0F,
+                (attrib, value) -> attrib.block_ratio = value / 100.0F,
+                attrib -> (int) (attrib.block_chance * 100),
+                attrib -> (int) (attrib.block_ratio * 100)
+        );
     }
 
     /**
@@ -103,8 +156,14 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib dodge [chance%]")
     public static void dodge(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt((AttribManager) self.manager, (Player) sender, args,
-                "Dodge", "dodge-chance", 0, 100);
+        getSetInt(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Dodge",
+                0, 100,
+                (attrib, value) -> attrib.dodge_chance = value / 100.0F,
+                attrib -> (int) (attrib.dodge_chance * 100)
+        );
     }
 
     /**
@@ -113,8 +172,16 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib crit [chance%] [ratio%]")
     public static void crit(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt2((AttribManager) self.manager, (Player) sender, args, "Crit",
-                "crit-chance", "crit-ratio", 0, 100, 0, Integer.MAX_VALUE);
+        getSetInt2(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Crit",
+                0, 100, 0, Integer.MAX_VALUE,
+                (attrib, value) -> attrib.crit_chance = value / 100.0F,
+                (attrib, value) -> attrib.crit_ratio = value / 100.0F,
+                attrib -> (int) (attrib.crit_chance * 100),
+                attrib -> (int) (attrib.crit_ratio * 100)
+        );
     }
 
     /**
@@ -123,8 +190,16 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib suck [chance%] [ratio%]")
     public static void suck(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt2((AttribManager) self.manager, (Player) sender, args, "Crit",
-                "suck-chance", "suck-ratio", 0, 100, 0, Integer.MAX_VALUE);
+        getSetInt2(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Suck",
+                0, 100, 0, Integer.MAX_VALUE,
+                (attrib, value) -> attrib.suck_chance = value / 100.0F,
+                (attrib, value) -> attrib.suck_ratio = value / 100.0F,
+                attrib -> (int) (attrib.suck_chance * 100),
+                attrib -> (int) (attrib.suck_ratio * 100)
+        );
     }
 
     /**
@@ -133,8 +208,16 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib onekill [chance%] [ratio%]")
     public static void onekill(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt2((AttribManager) self.manager, (Player) sender, args, "OneKill",
-                "onekill-chance", "onekill-ratio", 0, 100, 0, 100);
+        getSetInt2(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "OneKill",
+                0, 100, 0, 100,
+                (attrib, value) -> attrib.onekill_chance = value / 100.0F,
+                (attrib, value) -> attrib.onekill_ratio = value / 100.0F,
+                attrib -> (int) (attrib.onekill_chance * 100),
+                attrib -> (int) (attrib.onekill_ratio * 100)
+        );
     }
 
     /**
@@ -143,23 +226,28 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib thorn [chance%] [ratio%]")
     public static void thorn(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt2((AttribManager) self.manager, (Player) sender, args, "Crit",
-                "thorn-chance", "thorn-ratio", 0, 100, 0, Integer.MAX_VALUE);
-    }
-
-    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib update")
-    public static void update(SpigotCommand self, CommandSender sender, Paths args) {
-        AttribManager manager = (AttribManager) self.manager;
-        Player player = (Player) sender;
-        ItemStack stack = player.getItemInHand();
-        if (stack != null && stack.getType() != Material.AIR) {
-            updateLore(stack);
-        } else manager.sendKey(player, "emptyHand");
+        getSetInt2(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Thorn",
+                0, 100, 0, Integer.MAX_VALUE,
+                (attrib, value) -> attrib.thorn_chance = value / 100.0F,
+                (attrib, value) -> attrib.thorn_ratio = value / 100.0F,
+                attrib -> (int) (attrib.thorn_chance * 100),
+                attrib -> (int) (attrib.thorn_ratio * 100)
+        );
     }
 
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib immortal [chance%]")
     public static void immortal(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt((AttribManager) self.manager, (Player) sender, args, "Immortal", "immortal-chance", 0, 100);
+        getSetInt(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Immortal",
+                0, 100,
+                (attrib, value) -> attrib.immortal_chance = value / 100.0F,
+                attrib -> (int) (attrib.immortal_chance * 100)
+        );
     }
 
     /**
@@ -168,18 +256,38 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib rage [health%] [ratio%]")
     public static void rage(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetInt2((AttribManager) self.manager, (Player) sender, args, "Rage",
-                "rage-hp", "rage-ratio", 0, 100, 0, Integer.MAX_VALUE);
+        getSetInt2(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Rage",
+                0, 100, 0, Integer.MAX_VALUE,
+                (attrib, value) -> attrib.rage_health = value / 100.0F,
+                (attrib, value) -> attrib.rage_ratio = value / 100.0F,
+                attrib -> (int) (attrib.rage_health * 100),
+                attrib -> (int) (attrib.rage_ratio * 100)
+        );
     }
 
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib bind [enable]")
     public static void bind(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetBool((AttribManager) self.manager, (Player) sender, args, "Bind", "bind-enable");
+        getSetBool(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Bind",
+                (attrib, value) -> attrib.bind_enable = value,
+                attrib -> attrib.bind_enable
+        );
     }
 
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib perm [perm]")
     public static void perm(SpigotCommand self, CommandSender sender, Paths args) {
-        getSetString((AttribManager) self.manager, (Player) sender, args, "Perm", "perm");
+        getSetString(
+                (AttribManager) self.manager,
+                (Player) sender,
+                args, "Bind",
+                (attrib, value) -> attrib.perm = value,
+                attrib -> attrib.perm
+        );
     }
 
     /**
@@ -207,145 +315,117 @@ public final class CommandAttrib {
         // TODO 消耗生命值提升攻击力/防御
     }
 
-    private static void getSetBool(AttribManager manager, Player player, Paths args, String Name, String name) {
+    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib update")
+    public static void update(SpigotCommand self, CommandSender sender, Paths args) {
+        AttribManager manager = (AttribManager) self.manager;
+        Player player = (Player) sender;
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
-            NBTTagCompound tag = getTag(stack);
-            if (args.notEmpty()) {
-                try {
-                    boolean value = Boolean.valueOf(args.first());
-                    if (tag == null) {
-                        tag = new NBTTagCompound();
-                        setTag(stack, tag);
-                    }
-                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
-                    attribs.setBoolean(name, value);
-                    tag.set(ATTRIBS, attribs);
-                    manager.sendKey(player, "set" + Name, value);
-                    if (manager.isAutoUpdate()) updateLore(stack);
-                } catch (Throwable ignored) {
-                    manager.sendKey(player, "nbtError");
-                }
-            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-                boolean value = tag.getCompound(ATTRIBS).getBoolean(name);
-                manager.sendKey(player, "get" + Name, value);
-            } else manager.sendKey(player, "noTag");
+            updateLore(stack);
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetInt(AttribManager manager, Player player, Paths args, String Name, String name, int min, int max) {
+    private static void getSetInt(AttribManager manager, Player player, Paths args, String Name, int min, int max, BiConsumer<Attributes, Integer> consumer, Function<Attributes, Integer> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
-            NBTTagCompound tag = getTag(stack);
             if (args.notEmpty()) {
                 try {
                     int value = Integer.valueOf(args.first());
                     value = value < min ? min : value > max ? max : value;
-                    if (tag == null) {
-                        tag = new NBTTagCompound();
-                        setTag(stack, tag);
-                    }
-                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
-                    attribs.setInt(name, value);
-                    tag.set(ATTRIBS, attribs);
+                    Attributes attrib = manager.createAttrib(stack);
+                    player.setItemInHand(stack);
+                    consumer.accept(attrib, value);
                     manager.sendKey(player, "set" + Name, value);
-                    if (manager.isAutoUpdate()) updateLore(stack);
                 } catch (NumberFormatException ignored) {
                     manager.sendKey(player, "invalidInt");
-                } catch (Throwable ignored) {
-                    manager.sendKey(player, "nbtError");
                 }
-            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-                int value = tag.getCompound(ATTRIBS).getInt(name);
-                manager.sendKey(player, "get" + Name, value);
-            } else manager.sendKey(player, "noTag");
+            } else {
+                Attributes attrib = manager.getAttrib(stack);
+                if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
+                else manager.sendKey(player, "noAttrib");
+            }
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetFloat(AttribManager manager, Player player, Paths args, String Name, String name, float min, float max) {
+    private static void getSetInt2(AttribManager manager, Player player, Paths args, String Name, int min1, int max1, int min2, int max2, BiConsumer<Attributes, Integer> cs1, BiConsumer<Attributes, Integer> cs2, Function<Attributes, Integer> fun1, Function<Attributes, Integer> fun2) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
-            NBTTagCompound tag = getTag(stack);
-            if (args.notEmpty()) {
-                try {
-                    float value = Float.valueOf(args.first());
-                    value = value < min ? min : value > max ? max : value;
-                    if (tag == null) {
-                        tag = new NBTTagCompound();
-                        setTag(stack, tag);
-                    }
-                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
-                    attribs.setFloat(name, value);
-                    tag.set(ATTRIBS, attribs);
-                    manager.sendKey(player, "set" + Name, value);
-                    if (manager.isAutoUpdate()) updateLore(stack);
-                } catch (NumberFormatException ignored) {
-                    manager.sendKey(player, "invalidFloat");
-                } catch (Throwable ignored) {
-                    manager.sendKey(player, "nbtError");
-                }
-            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-                float value = tag.getCompound(ATTRIBS).getFloat(name);
-                manager.sendKey(player, "get" + Name, value);
-            } else manager.sendKey(player, "noTag");
-        } else manager.sendKey(player, "emptyHand");
-    }
-
-    private static void getSetInt2(AttribManager manager, Player player, Paths args, String Name, String name1, String name2, int min1, int max1, int min2, int max2) {
-        ItemStack stack = player.getItemInHand();
-        if (stack != null && stack.getType() != Material.AIR) {
-            NBTTagCompound tag = getTag(stack);
             if (args.notEmpty()) {
                 try {
                     int value1 = Integer.valueOf(args.get(0));
                     int value2 = Integer.valueOf(args.get(1));
                     value1 = value1 < min1 ? min1 : value1 > max1 ? max1 : value1;
                     value2 = value2 < min2 ? min2 : value2 > max2 ? max2 : value2;
-                    if (tag == null) {
-                        tag = new NBTTagCompound();
-                        setTag(stack, tag);
-                    }
-                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
-                    attribs.setInt(name1, value1);
-                    attribs.setInt(name2, value2);
-                    tag.set(ATTRIBS, attribs);
+                    Attributes attrib = manager.createAttrib(stack);
+                    player.setItemInHand(stack);
+                    cs1.accept(attrib, value1);
+                    cs2.accept(attrib, value2);
                     manager.sendKey(player, "set" + Name, value1, value2);
-                    if (manager.isAutoUpdate()) updateLore(stack);
                 } catch (NumberFormatException ignored) {
                     manager.sendKey(player, "invalidInt");
-                } catch (Throwable ignored) {
-                    manager.sendKey(player, "nbtError");
                 }
-            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-                int value1 = tag.getCompound(ATTRIBS).getInt(name1);
-                int value2 = tag.getCompound(ATTRIBS).getInt(name2);
-                manager.sendKey(player, "get" + Name, value1, value2);
-            } else manager.sendKey(player, "noTag");
+            } else {
+                Attributes attrib = manager.getAttrib(stack);
+                if (attrib != null) manager.sendKey(player, "get" + Name, fun1.apply(attrib), fun2.apply(attrib));
+                else manager.sendKey(player, "noAttrib");
+            }
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetString(AttribManager manager, Player player, Paths args, String Name, String name) {
+    private static void getSetFloat(AttribManager manager, Player player, Paths args, String Name, float min, float max, BiConsumer<Attributes, Float> consumer, Function<Attributes, Float> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
-            NBTTagCompound tag = getTag(stack);
             if (args.notEmpty()) {
                 try {
-                    if (tag == null) {
-                        tag = new NBTTagCompound();
-                        setTag(stack, tag);
-                    }
-                    NBTTagCompound attribs = tag.getCompound(ATTRIBS);
-                    attribs.setString(name, args.first());
-                    tag.set(ATTRIBS, attribs);
-                    manager.sendKey(player, "set" + Name, args.first());
-                    if (manager.isAutoUpdate()) updateLore(stack);
-                } catch (Throwable ignored) {
-                    manager.sendKey(player, "nbtError");
+                    float value = Float.valueOf(args.first());
+                    value = value < min ? min : value > max ? max : value;
+                    Attributes attrib = manager.createAttrib(stack);
+                    player.setItemInHand(stack);
+                    consumer.accept(attrib, value);
+                    manager.sendKey(player, "set" + Name, value);
+                } catch (NumberFormatException ignored) {
+                    manager.sendKey(player, "invalidFloat");
                 }
-            } else if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-                String value = tag.getCompound(ATTRIBS).getString(name);
-                manager.sendKey(player, "get" + Name, value);
-            } else manager.sendKey(player, "noTag");
+            } else {
+                Attributes attrib = manager.getAttrib(stack);
+                if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
+                else manager.sendKey(player, "noAttrib");
+            }
         } else manager.sendKey(player, "emptyHand");
     }
+
+    private static void getSetBool(AttribManager manager, Player player, Paths args, String Name, BiConsumer<Attributes, Boolean> consumer, Function<Attributes, Boolean> function) {
+        ItemStack stack = player.getItemInHand();
+        if (stack != null && stack.getType() != Material.AIR) {
+            if (args.notEmpty()) {
+                boolean value = Boolean.valueOf(args.first());
+                Attributes attrib = manager.createAttrib(stack);
+                player.setItemInHand(stack);
+                consumer.accept(attrib, value);
+                manager.sendKey(player, "set" + Name, value);
+            } else {
+                Attributes attrib = manager.getAttrib(stack);
+                if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
+                else manager.sendKey(player, "noAttrib");
+            }
+        } else manager.sendKey(player, "emptyHand");
+    }
+
+    private static void getSetString(AttribManager manager, Player player, Paths args, String Name, BiConsumer<Attributes, String> consumer, Function<Attributes, String> function) {
+        ItemStack stack = player.getItemInHand();
+        if (stack != null && stack.getType() != Material.AIR) {
+            if (args.notEmpty()) {
+                String value = args.first();
+                Attributes attrib = manager.createAttrib(stack);
+                player.setItemInHand(stack);
+                consumer.accept(attrib, value);
+                manager.sendKey(player, "set" + Name, value);
+            } else {
+                Attributes attrib = manager.getAttrib(stack);
+                if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
+                else manager.sendKey(player, "noAttrib");
+            }
+        } else manager.sendKey(player, "emptyHand");
+    }
+
 }

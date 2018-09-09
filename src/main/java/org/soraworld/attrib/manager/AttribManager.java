@@ -1,20 +1,21 @@
 package org.soraworld.attrib.manager;
 
 import net.minecraft.server.v1_7_R4.EntityPlayer;
-import net.minecraft.server.v1_7_R4.NBTTagCompound;
-import org.bukkit.craftbukkit.v1_7_R4.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.soraworld.attrib.data.Attributes;
+import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.manager.SpigotManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.util.ChatColor;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AttribManager extends SpigotManager {
 
@@ -32,25 +33,19 @@ public class AttribManager extends SpigotManager {
     public static final int TAG_INT_A = 11;
     public static final String ATTRIBS = "attribs";
 
-    private static final Field handle;
-    private static final boolean support;
+    private static final Attributes serializer = new Attributes();
 
-    @Setting
+    // &f&r&f&r
+    private static String SPLIT = ChatColor.COLOR_CHAR + "f" + ChatColor.COLOR_CHAR + "r" + ChatColor.COLOR_CHAR + "f" + ChatColor.COLOR_CHAR + "r";
+    private static String COLOR_STRING = "" + ChatColor.COLOR_CHAR;
+
     private HashMap<Integer, Attributes> items = new HashMap<>();
+
+    private final Path itemconfile;
+
     private HashMap<String, Integer> ids = new HashMap<>();
 
-    static {
-        Field _handle = null;
-        boolean _support = false;
-        try {
-            _handle = CraftItemStack.class.getDeclaredField("handle");
-            _handle.setAccessible(true);
-            _support = true;
-        } catch (Throwable ignored) {
-        }
-        handle = _handle;
-        support = _support;
-    }
+    private int NextID = 0;
 
     @Setting(comment = "comment.autoUpdate")
     private boolean autoUpdate = false;
@@ -61,6 +56,7 @@ public class AttribManager extends SpigotManager {
 
     public AttribManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
+        itemconfile = path.resolve("items.conf");
     }
 
     @Nonnull
@@ -68,28 +64,67 @@ public class AttribManager extends SpigotManager {
         return ChatColor.DARK_GREEN;
     }
 
-    public static net.minecraft.server.v1_7_R4.ItemStack getNMStack(org.bukkit.inventory.ItemStack stack) {
+    public Attributes getAttrib(ItemStack stack) {
+        return items.get(getId(stack));
+    }
+
+    public void beforeLoad() {
+        options.registerType(new Attributes());
+    }
+
+    public void afterLoad() {
+        FileNode node = new FileNode(itemconfile.toFile(), options);
         try {
-            return (net.minecraft.server.v1_7_R4.ItemStack) handle.get(stack);
-        } catch (Throwable ignored) {
-            return null;
+            node.load(false);
+            items.clear();
+            for (String key : node.keys()) {
+                try {
+                    int id = Integer.valueOf(key);
+                    Attributes attrib = serializer.deserialize(Attributes.class, node.get(key));
+                    if (attrib != null) items.put(id, attrib);
+                } catch (Throwable ignored) {
+                }
+            }
+        } catch (Exception e) {
+            saveItems();
         }
     }
 
-    public static net.minecraft.server.v1_7_R4.Item getNMSItem(org.bukkit.inventory.ItemStack stack) {
+    public boolean save() {
+        saveItems();
+        return super.save();
+    }
+
+    public void saveItems() {
+        FileNode node = new FileNode(itemconfile.toFile(), options);
+        for (Map.Entry<Integer, Attributes> entry : items.entrySet()) {
+            node.set(entry.getKey().toString(), serializer.serialize(Attributes.class, entry.getValue(), options));
+        }
         try {
-            return ((net.minecraft.server.v1_7_R4.ItemStack) handle.get(stack)).getItem();
-        } catch (Throwable ignored) {
-            return null;
+            node.save();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public static NBTTagCompound getTag(org.bukkit.inventory.ItemStack stack) {
-        try {
-            return ((net.minecraft.server.v1_7_R4.ItemStack) handle.get(stack)).tag;
-        } catch (Throwable ignored) {
-            return null;
+    public static int getId(ItemStack stack) {
+        if (stack.hasItemMeta()) {
+            ItemMeta meta = stack.getItemMeta();
+            if (meta.hasDisplayName()) {
+                return getId(meta.getDisplayName());
+            }
         }
+        return -1;
+    }
+
+    public static int getId(String display) {
+        if (display != null && !display.isEmpty()) {
+            String[] ss = display.split(SPLIT);
+            if (ss.length == 2) {
+                return Integer.valueOf(ss[0].replace(COLOR_STRING, ""));
+            }
+        }
+        return -1;
     }
 
     /**
@@ -111,26 +146,50 @@ public class AttribManager extends SpigotManager {
         return accumulateDodge;
     }
 
-
-    public static void setTag(org.bukkit.inventory.ItemStack stack, NBTTagCompound tag) {
-        try {
-            ((net.minecraft.server.v1_7_R4.ItemStack) handle.get(stack)).tag = tag;
-        } catch (Throwable ignored) {
-        }
-    }
-
     public static void updateLore(ItemStack stack) {
-        // TODO will
-        NBTTagCompound tag = getTag(stack);
-        if (tag != null && tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-            NBTTagCompound attribs = tag.getCompound(ATTRIBS);
-            ArrayList<String> lore = new ArrayList<>();
-            // TODO add attribs
-            stack.getItemMeta().setLore(lore);
-        }
     }
 
     public boolean isHoldingRight(EntityPlayer player) {
         return player.by();
     }
+
+    public Attributes createAttrib(ItemStack stack) {
+        ItemMeta meta = stack.getItemMeta();
+        List<String> lore = meta.getLore();
+        if (lore == null) lore = new ArrayList<>();
+        if (lore.size() > 0) {
+            String first = lore.get(0);
+            int index = first.indexOf("attrib-id:");
+            if (index >= 0) {
+                try {
+                    int id = Integer.valueOf(first.substring(index + 10));
+                    lore.set(0, "" + ChatColor.RESET + ChatColor.AQUA + "attrib-id:" + id);
+                    meta.setLore(lore);
+                    stack.setItemMeta(meta);
+                    Attributes attrib = items.get(id);
+                    if (attrib != null) return attrib;
+                    attrib = new Attributes();
+                    items.put(id, attrib);
+                    return attrib;
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                    Attributes attrib = new Attributes();
+                    while (items.containsKey(NextID)) NextID++;
+                    items.put(NextID, attrib);
+                    lore.set(0, "" + ChatColor.RESET + ChatColor.AQUA + "attrib-id:" + NextID);
+                    meta.setLore(lore);
+                    stack.setItemMeta(meta);
+                    return attrib;
+                }
+            }
+        }
+        Attributes attrib = new Attributes();
+        while (items.containsKey(NextID)) NextID++;
+        items.put(NextID, attrib);
+        lore.add(0, "" + ChatColor.RESET + ChatColor.AQUA + "attrib-id:" + NextID);
+        meta.setLore(lore);
+        stack.setItemMeta(meta);
+        return attrib;
+    }
+
 }
