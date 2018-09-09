@@ -42,14 +42,14 @@ public class EventListener implements Listener {
         //updateArmor(event.getPlayer());
     }
 
+    @EventHandler
     public void on(PlayerItemHeldEvent event) {
-
     }
 
     /**
      * 当玩家右键装备护甲时更新属性.
      */
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
             Bukkit.getScheduler().runTask(manager.getPlugin(), () -> updateArmor(event.getPlayer()));
@@ -81,15 +81,14 @@ public class EventListener implements Listener {
      */
     @EventHandler
     public void on(PlayerItemDamageEvent event) {
-
     }
 
+    @EventHandler
     public void onPlayerAttack(EntityDamageByEntityEvent event) {
-
     }
 
+    @EventHandler
     public void onPlayerConsumeItem(PlayerItemConsumeEvent event) {
-
     }
 
     private void updateArmor(Player player) {
