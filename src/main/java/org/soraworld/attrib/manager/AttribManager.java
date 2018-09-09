@@ -72,7 +72,7 @@ public class AttribManager extends SpigotManager {
         options.registerType(new Attributes());
     }
 
-    public void afterLoad() {
+    public void loadItems() {
         FileNode node = new FileNode(itemconfile.toFile(), options);
         try {
             node.load(false);
@@ -82,12 +82,19 @@ public class AttribManager extends SpigotManager {
                     int id = Integer.valueOf(key);
                     Attributes attrib = serializer.deserialize(Attributes.class, node.get(key));
                     if (attrib != null) items.put(id, attrib);
-                } catch (Throwable ignored) {
+                } catch (Throwable e) {
+                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             saveItems();
         }
+    }
+
+    public boolean load() {
+        loadItems();
+        return super.load();
     }
 
     public boolean save() {
@@ -110,18 +117,16 @@ public class AttribManager extends SpigotManager {
     public static int getId(ItemStack stack) {
         if (stack.hasItemMeta()) {
             ItemMeta meta = stack.getItemMeta();
-            if (meta.hasDisplayName()) {
-                return getId(meta.getDisplayName());
-            }
-        }
-        return -1;
-    }
-
-    public static int getId(String display) {
-        if (display != null && !display.isEmpty()) {
-            String[] ss = display.split(SPLIT);
-            if (ss.length == 2) {
-                return Integer.valueOf(ss[0].replace(COLOR_STRING, ""));
+            if (meta.hasLore()) {
+                String first = meta.getLore().get(0);
+                int index = first.indexOf("attrib-id:");
+                if (index >= 0) {
+                    try {
+                        return Integer.valueOf(first.substring(index + 10));
+                    } catch (Throwable ignored) {
+                        return -1;
+                    }
+                }
             }
         }
         return -1;

@@ -1,6 +1,10 @@
 package org.soraworld.attrib.listener;
 
-import net.minecraft.server.v1_7_R4.*;
+import net.minecraft.server.v1_7_R4.AttributeInstance;
+import net.minecraft.server.v1_7_R4.AttributeModifier;
+import net.minecraft.server.v1_7_R4.EntityPlayer;
+import net.minecraft.server.v1_7_R4.GenericAttributes;
+import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,15 +15,12 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.soraworld.attrib.data.Attributes;
 import org.soraworld.attrib.manager.AttribManager;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
-
-import static org.soraworld.attrib.manager.AttribManager.ATTRIBS;
-import static org.soraworld.attrib.manager.AttribManager.TAG_COMP;
 
 public class EventListener implements Listener {
 
@@ -38,7 +39,7 @@ public class EventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
-        //updatePlayer(event.getPlayer());
+        //updateArmor(event.getPlayer());
     }
 
     public void on(PlayerItemHeldEvent event) {
@@ -51,13 +52,7 @@ public class EventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
-            System.out.println(event.hasItem());
-            System.out.println(event.getItem());
-      /*      Item item = getNMSItem(event.getItem());
-            System.out.println(item);
-            if (event.hasItem() && getNMSItem(event.getItem()) instanceof ItemArmor) {
-                Bukkit.getScheduler().runTask(manager.getPlugin(), () -> updatePlayer(event.getPlayer()));
-            }*/
+            Bukkit.getScheduler().runTask(manager.getPlugin(), () -> updateArmor(event.getPlayer()));
         }
     }
 
@@ -67,9 +62,7 @@ public class EventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInventoryClick(InventoryClickEvent event) {
         if (event.getClickedInventory() instanceof PlayerInventory) {
-            /*if (getNMSItem(event.getCurrentItem()) instanceof ItemArmor) {
-                Bukkit.getScheduler().runTask(manager.getPlugin(), () -> updatePlayer((Player) event.getWhoClicked()));
-            }*/
+            Bukkit.getScheduler().runTask(manager.getPlugin(), () -> updateArmor((Player) event.getWhoClicked()));
         }
     }
 
@@ -77,7 +70,7 @@ public class EventListener implements Listener {
     public void on(InventoryCloseEvent event) {
         System.out.println("InventoryCloseEvent");
         if (event.getInventory() instanceof PlayerInventory) {
-            //updatePlayer((Player) event.getPlayer());
+            //updateArmor((Player) event.getPlayer());
         }
     }
 
@@ -99,27 +92,24 @@ public class EventListener implements Listener {
 
     }
 
-    private static void updatePlayer(Player player) {
-        if (System.currentTimeMillis() - last < 1000) return;
+    private void updateArmor(Player player) {
+        if (System.currentTimeMillis() - last < 500) return;
         last = System.currentTimeMillis();
         double maxHealth = 0.0D, moveSpeed = 0.0D, attackDamage = 0.0D, knockResist = 0.0D;
-        EntityPlayer handle = ((CraftPlayer) player).getHandle();
-        List<ItemStack> stacks = Arrays.asList(
-                handle.inventory.getItemInHand(),
-                handle.inventory.armor[0],
-                handle.inventory.armor[1],
-                handle.inventory.armor[2],
-                handle.inventory.armor[3]);
+        ItemStack[] stacks = player.getInventory().getArmorContents();
         for (ItemStack stack : stacks) {
-            if (stack != null && stack.tag != null && stack.tag.hasKeyOfType(ATTRIBS, TAG_COMP)) {
-                NBTTagCompound attrib = stack.tag.getCompound(ATTRIBS);
-                maxHealth += attrib.getInt("health");
-                moveSpeed += attrib.getInt("speed") / 100.D;
-                attackDamage += attrib.getInt("attack");
-                knockResist += attrib.getInt("knock") / 100.0D;
+            if (stack != null) {
+                Attributes attrib = manager.getAttrib(stack);
+                if (attrib != null) {
+                    maxHealth += attrib.health;
+                    moveSpeed += attrib.walkspeed;
+                    attackDamage += attrib.attack;
+                    knockResist += attrib.knock;
+                }
             }
         }
 
+        EntityPlayer handle = ((CraftPlayer) player).getHandle();
         AttributeModifier maxHealthModifier = new AttributeModifier(maxHealthUUID, "maxHealth", maxHealth, 0);
         AttributeInstance attrib = handle.getAttributeInstance(GenericAttributes.maxHealth);
         attrib.b(maxHealthModifier);// remove
