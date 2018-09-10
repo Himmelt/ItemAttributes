@@ -12,14 +12,13 @@ public class PlayerSecond extends BukkitRunnable {
     private final AttribManager manager;
 
     public PlayerSecond(AttribManager manager, Player player) {
-        // TODO check respawn player reference changes ?
         this.player = player;
         this.manager = manager;
     }
 
     public void run() {
         ItemStack[] stacks = player.getInventory().getArmorContents();
-        float regain = 0.0F, flyspeed = 0.0F;
+        float regain = 0.0F, flyspeed = 0.1F;
         for (ItemStack stack : stacks) {
             Attributes attrib = manager.getAttrib(stack);
             if (attrib != null) {
@@ -28,7 +27,10 @@ public class PlayerSecond extends BukkitRunnable {
                 // TODO potions
             }
         }
-        player.setHealth(player.getHealth() + regain);
-        player.setFlySpeed(flyspeed);
+
+        player.setFlySpeed(flyspeed > 1.0F ? 1.0F : flyspeed < -1.0F ? -1.0F : flyspeed);
+        if (player.getHealth() < player.getMaxHealth() - regain) {
+            player.setHealth(player.getHealth() + regain);
+        } else player.setHealth(player.getMaxHealth());
     }
 }

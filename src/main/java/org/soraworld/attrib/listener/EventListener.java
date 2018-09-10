@@ -108,14 +108,11 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        System.out.println("PlayerJoinEvent" + event.getPlayer());
         manager.startTask(event.getPlayer());
     }
 
-    @EventHandler
+    //@EventHandler
     public void onPlayerLogin(PlayerLoginEvent event) {
-        // TODO ??? check sequence with join event
-        System.out.println("PlayerLoginEvent" + event.getPlayer());
     }
 
     @EventHandler

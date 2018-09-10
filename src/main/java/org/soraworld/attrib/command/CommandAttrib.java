@@ -61,7 +61,7 @@ public final class CommandAttrib {
                 (AttribManager) self.manager,
                 (Player) sender,
                 args, "WalkSpeed",
-                0, Float.MAX_VALUE,
+                0, 1,
                 (attrib, value) -> attrib.walkspeed = value,
                 attrib -> attrib.walkspeed
         );
@@ -77,7 +77,7 @@ public final class CommandAttrib {
                 (AttribManager) self.manager,
                 (Player) sender,
                 args, "FlySpeed",
-                0, Float.MAX_VALUE,
+                0, 1,
                 (attrib, value) -> attrib.flyspeed = value,
                 attrib -> attrib.flyspeed
         );

@@ -1,5 +1,6 @@
 package org.soraworld.attrib;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.soraworld.attrib.command.CommandAttrib;
 import org.soraworld.attrib.listener.EventListener;
@@ -45,5 +46,11 @@ public class ItemAttributes extends SpigotPlugin {
     @Nonnull
     public String assetsId() {
         return "attrib";
+    }
+
+    public void afterEnable() {
+        for (Player player : getServer().getOnlinePlayers()) {
+            ((AttribManager) manager).startTask(player);
+        }
     }
 }
