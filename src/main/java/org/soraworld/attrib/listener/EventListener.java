@@ -17,9 +17,12 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.soraworld.attrib.data.Attributes;
 import org.soraworld.attrib.manager.AttribManager;
+import org.soraworld.violet.plugin.SpigotPlugin;
 
+import java.util.Random;
 import java.util.UUID;
 
 public class EventListener implements Listener {
@@ -30,11 +33,16 @@ public class EventListener implements Listener {
     private static final UUID knockResistUUID = UUID.fromString("96d8c6f6-41b6-42ea-8a1b-cfa3131b7d72");
 
     private static long last = System.currentTimeMillis();
+    private static Random random = new Random(System.currentTimeMillis());
 
+    private final SpigotPlugin plugin;
     private final AttribManager manager;
+    private final BukkitScheduler scheduler;
 
     public EventListener(AttribManager manager) {
         this.manager = manager;
+        this.scheduler = Bukkit.getScheduler();
+        this.plugin = manager.getPlugin();
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -43,7 +51,8 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
-    public void on(PlayerItemHeldEvent event) {
+    public void onPlayerItemHeld(PlayerItemHeldEvent event) {
+        scheduler.runTask(plugin, () -> updateWeapon(event.getPlayer()));
     }
 
     /**
@@ -52,7 +61,7 @@ public class EventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
-            Bukkit.getScheduler().runTask(manager.getPlugin(), () -> updateArmor(event.getPlayer()));
+            scheduler.runTask(plugin, () -> updateArmor(event.getPlayer()));
         }
     }
 
@@ -62,7 +71,7 @@ public class EventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInventoryClick(InventoryClickEvent event) {
         if (event.getClickedInventory() instanceof PlayerInventory) {
-            Bukkit.getScheduler().runTask(manager.getPlugin(), () -> updateArmor((Player) event.getWhoClicked()));
+            scheduler.runTask(plugin, () -> updateArmor((Player) event.getWhoClicked()));
         }
     }
 
@@ -80,7 +89,21 @@ public class EventListener implements Listener {
      * @param event the event
      */
     @EventHandler
-    public void on(PlayerItemDamageEvent event) {
+    public void onPlayerItemDamage(PlayerItemDamageEvent event) {
+        System.out.println("PlayerItemDamageEvent:" + event.getItem() + "|" + event.getDamage());
+        Attributes attrib = manager.getAttrib(event.getItem());
+        if (attrib != null && attrib.immortal_chance > 0 && random.nextFloat() < attrib.immortal_chance) {
+            // TODO check cancel ??
+            System.out.println("immortal:" + attrib.immortal_chance);
+            event.setDamage(0);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void on(PlayerItemBreakEvent event) {
+        if (manager.getAttrib(event.getBrokenItem()) != null) {
+            scheduler.runTask(plugin, () -> updateArmor(event.getPlayer()));
+        }
     }
 
     @EventHandler
@@ -88,13 +111,28 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        manager.startTask(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerLogin(PlayerLoginEvent event) {
+        // ??? check sequence with join event
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        manager.stopTask(event.getPlayer());
+    }
+
+    @EventHandler
     public void onPlayerConsumeItem(PlayerItemConsumeEvent event) {
     }
 
     private void updateArmor(Player player) {
-        if (System.currentTimeMillis() - last < 500) return;
+        if (System.currentTimeMillis() - last < 300) return;
         last = System.currentTimeMillis();
-        double maxHealth = 0.0D, moveSpeed = 0.0D, attackDamage = 0.0D, knockResist = 0.0D;
+        double maxHealth = 0.0D, moveSpeed = 0.0D, /*attackDamage = 0.0D,*/ knockResist = 0.0D;
         ItemStack[] stacks = player.getInventory().getArmorContents();
         for (ItemStack stack : stacks) {
             if (stack != null) {
@@ -102,7 +140,7 @@ public class EventListener implements Listener {
                 if (attrib != null) {
                     maxHealth += attrib.health;
                     moveSpeed += attrib.walkspeed;
-                    attackDamage += attrib.attack;
+                    //attackDamage += attrib.attack;
                     knockResist += attrib.knock;
                 }
             }
@@ -119,14 +157,27 @@ public class EventListener implements Listener {
         attrib.b(moveSpeedModifier);// remove
         if (moveSpeed != 0) attrib.a(moveSpeedModifier);// apply
 
-        AttributeModifier attackDamageModifier = new AttributeModifier(attackDamageUUID, "attackDamage", attackDamage, 0);
-        attrib = handle.getAttributeInstance(GenericAttributes.e);// attackDamage
-        attrib.b(attackDamageModifier);// remove
-        if (attackDamage != 0) attrib.a(attackDamageModifier);// apply
+        //AttributeModifier attackDamageModifier = new AttributeModifier(attackDamageUUID, "attackDamage", attackDamage, 0);
+        //attrib = handle.getAttributeInstance(GenericAttributes.e);// attackDamage
+        //attrib.b(attackDamageModifier);// remove
+        //if (attackDamage != 0) attrib.a(attackDamageModifier);// apply
 
         AttributeModifier knockResistModifier = new AttributeModifier(knockResistUUID, "knockResist", knockResist, 0);
         attrib = handle.getAttributeInstance(GenericAttributes.c);// knockbackResistance
         attrib.b(knockResistModifier);// remove
         if (knockResist != 0) attrib.a(knockResistModifier);// apply
+    }
+
+    private void updateWeapon(Player player) {
+        if (System.currentTimeMillis() - last < 300) return;
+        last = System.currentTimeMillis();
+        Attributes attrib = manager.getAttrib(player.getItemInHand());
+        if (attrib != null && attrib.attack > 0) {
+            EntityPlayer handle = ((CraftPlayer) player).getHandle();
+            AttributeModifier modifier = new AttributeModifier(attackDamageUUID, "attackDamage", attrib.attack, 0);
+            AttributeInstance attack = handle.getAttributeInstance(GenericAttributes.e);// attackDamage
+            attack.b(modifier);// remove
+            attack.a(modifier);// apply
+        }
     }
 }

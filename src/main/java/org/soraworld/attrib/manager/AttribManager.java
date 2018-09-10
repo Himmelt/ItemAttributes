@@ -1,9 +1,11 @@
 package org.soraworld.attrib.manager;
 
 import net.minecraft.server.v1_7_R4.EntityPlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.soraworld.attrib.data.Attributes;
+import org.soraworld.attrib.task.PlayerSecond;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.manager.SpigotManager;
@@ -12,10 +14,7 @@ import org.soraworld.violet.util.ChatColor;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AttribManager extends SpigotManager {
 
@@ -44,6 +43,8 @@ public class AttribManager extends SpigotManager {
     private final Path itemconfile;
 
     private HashMap<String, Integer> ids = new HashMap<>();
+
+    private HashMap<UUID, PlayerSecond> tasks = new HashMap<>();
 
     private int NextID = 0;
 
@@ -115,6 +116,7 @@ public class AttribManager extends SpigotManager {
     }
 
     public static int getId(ItemStack stack) {
+        if (stack == null) return -1;
         if (stack.hasItemMeta()) {
             ItemMeta meta = stack.getItemMeta();
             if (meta.hasLore()) {
@@ -197,4 +199,18 @@ public class AttribManager extends SpigotManager {
         return attrib;
     }
 
+    public void startTask(Player player) {
+        PlayerSecond task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> new PlayerSecond(AttribManager.this, player));
+        try {
+            task.runTaskTimer(plugin, 1, 20);
+        } catch (Throwable e) {
+            if (debug) e.printStackTrace();
+        }
+    }
+
+    public void stopTask(Player player) {
+        PlayerSecond task = tasks.get(player.getUniqueId());
+        if (task != null) task.cancel();
+        tasks.remove(player.getUniqueId());
+    }
 }
