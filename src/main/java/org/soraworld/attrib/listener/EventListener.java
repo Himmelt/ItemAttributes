@@ -84,18 +84,14 @@ public class EventListener implements Listener {
     }
 
     /**
-     * 护甲损坏时更新属性.
-     *
-     * @param event the event
+     * 物品消耗耐久时检查 不灭 属性.
      */
     @EventHandler
     public void onPlayerItemDamage(PlayerItemDamageEvent event) {
-        System.out.println("PlayerItemDamageEvent:" + event.getItem() + "|" + event.getDamage());
         Attributes attrib = manager.getAttrib(event.getItem());
         if (attrib != null && attrib.immortal_chance > 0 && random.nextFloat() < attrib.immortal_chance) {
-            // TODO check cancel ??
-            System.out.println("immortal:" + attrib.immortal_chance);
             event.setDamage(0);
+            event.getPlayer().updateInventory();
         }
     }
 
@@ -112,12 +108,14 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        System.out.println("PlayerJoinEvent" + event.getPlayer());
         manager.startTask(event.getPlayer());
     }
 
     @EventHandler
     public void onPlayerLogin(PlayerLoginEvent event) {
-        // ??? check sequence with join event
+        // TODO ??? check sequence with join event
+        System.out.println("PlayerLoginEvent" + event.getPlayer());
     }
 
     @EventHandler
