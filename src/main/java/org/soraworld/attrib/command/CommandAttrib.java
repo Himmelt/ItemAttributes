@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.soraworld.attrib.data.Attributes;
+import org.soraworld.attrib.data.ItemAttrib;
 import org.soraworld.attrib.manager.AttribManager;
 import org.soraworld.violet.command.Paths;
 import org.soraworld.violet.command.SpigotCommand;
@@ -161,8 +161,8 @@ public final class CommandAttrib {
                 (Player) sender,
                 args, "Dodge",
                 0, 100,
-                (attrib, value) -> attrib.dodge_chance = value / 100.0F,
-                attrib -> (int) (attrib.dodge_chance * 100)
+                (attrib, value) -> attrib.dodgeChance = value / 100.0F,
+                attrib -> (int) (attrib.dodgeChance * 100)
         );
     }
 
@@ -177,10 +177,10 @@ public final class CommandAttrib {
                 (Player) sender,
                 args, "Crit",
                 0, 100, 0, Integer.MAX_VALUE,
-                (attrib, value) -> attrib.crit_chance = value / 100.0F,
-                (attrib, value) -> attrib.crit_ratio = value / 100.0F,
-                attrib -> (int) (attrib.crit_chance * 100),
-                attrib -> (int) (attrib.crit_ratio * 100)
+                (attrib, value) -> attrib.critChance = value / 100.0F,
+                (attrib, value) -> attrib.critRatio = 1.0F + value / 100.0F,
+                attrib -> (int) (attrib.critChance * 100),
+                attrib -> (int) (attrib.critRatio * 100 - 100)
         );
     }
 
@@ -231,10 +231,10 @@ public final class CommandAttrib {
                 (Player) sender,
                 args, "Thorn",
                 0, 100, 0, Integer.MAX_VALUE,
-                (attrib, value) -> attrib.thorn_chance = value / 100.0F,
-                (attrib, value) -> attrib.thorn_ratio = value / 100.0F,
-                attrib -> (int) (attrib.thorn_chance * 100),
-                attrib -> (int) (attrib.thorn_ratio * 100)
+                (attrib, value) -> attrib.thornChance = value / 100.0F,
+                (attrib, value) -> attrib.thornRatio = value / 100.0F,
+                attrib -> (int) (attrib.thornChance * 100),
+                attrib -> (int) (attrib.thornRatio * 100)
         );
     }
 
@@ -245,8 +245,8 @@ public final class CommandAttrib {
                 (Player) sender,
                 args, "Immortal",
                 0, 100,
-                (attrib, value) -> attrib.immortal_chance = value / 100.0F,
-                attrib -> (int) (attrib.immortal_chance * 100)
+                (attrib, value) -> attrib.immortalChance = value / 100.0F,
+                attrib -> (int) (attrib.immortalChance * 100)
         );
     }
 
@@ -325,14 +325,14 @@ public final class CommandAttrib {
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetInt(AttribManager manager, Player player, Paths args, String Name, int min, int max, BiConsumer<Attributes, Integer> consumer, Function<Attributes, Integer> function) {
+    private static void getSetInt(AttribManager manager, Player player, Paths args, String Name, int min, int max, BiConsumer<ItemAttrib, Integer> consumer, Function<ItemAttrib, Integer> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
                 try {
                     int value = Integer.valueOf(args.first());
                     value = value < min ? min : value > max ? max : value;
-                    Attributes attrib = manager.createAttrib(stack);
+                    ItemAttrib attrib = manager.createAttrib(stack);
                     player.setItemInHand(stack);
                     consumer.accept(attrib, value);
                     manager.sendKey(player, "set" + Name, value);
@@ -340,14 +340,14 @@ public final class CommandAttrib {
                     manager.sendKey(player, "invalidInt");
                 }
             } else {
-                Attributes attrib = manager.getAttrib(stack);
+                ItemAttrib attrib = manager.getAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetInt2(AttribManager manager, Player player, Paths args, String Name, int min1, int max1, int min2, int max2, BiConsumer<Attributes, Integer> cs1, BiConsumer<Attributes, Integer> cs2, Function<Attributes, Integer> fun1, Function<Attributes, Integer> fun2) {
+    private static void getSetInt2(AttribManager manager, Player player, Paths args, String Name, int min1, int max1, int min2, int max2, BiConsumer<ItemAttrib, Integer> cs1, BiConsumer<ItemAttrib, Integer> cs2, Function<ItemAttrib, Integer> fun1, Function<ItemAttrib, Integer> fun2) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
@@ -356,7 +356,7 @@ public final class CommandAttrib {
                     int value2 = Integer.valueOf(args.get(1));
                     value1 = value1 < min1 ? min1 : value1 > max1 ? max1 : value1;
                     value2 = value2 < min2 ? min2 : value2 > max2 ? max2 : value2;
-                    Attributes attrib = manager.createAttrib(stack);
+                    ItemAttrib attrib = manager.createAttrib(stack);
                     player.setItemInHand(stack);
                     cs1.accept(attrib, value1);
                     cs2.accept(attrib, value2);
@@ -365,21 +365,21 @@ public final class CommandAttrib {
                     manager.sendKey(player, "invalidInt");
                 }
             } else {
-                Attributes attrib = manager.getAttrib(stack);
+                ItemAttrib attrib = manager.getAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, fun1.apply(attrib), fun2.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetFloat(AttribManager manager, Player player, Paths args, String Name, float min, float max, BiConsumer<Attributes, Float> consumer, Function<Attributes, Float> function) {
+    private static void getSetFloat(AttribManager manager, Player player, Paths args, String Name, float min, float max, BiConsumer<ItemAttrib, Float> consumer, Function<ItemAttrib, Float> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
                 try {
                     float value = Float.valueOf(args.first());
                     value = value < min ? min : value > max ? max : value;
-                    Attributes attrib = manager.createAttrib(stack);
+                    ItemAttrib attrib = manager.createAttrib(stack);
                     player.setItemInHand(stack);
                     consumer.accept(attrib, value);
                     manager.sendKey(player, "set" + Name, value);
@@ -387,41 +387,41 @@ public final class CommandAttrib {
                     manager.sendKey(player, "invalidFloat");
                 }
             } else {
-                Attributes attrib = manager.getAttrib(stack);
+                ItemAttrib attrib = manager.getAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetBool(AttribManager manager, Player player, Paths args, String Name, BiConsumer<Attributes, Boolean> consumer, Function<Attributes, Boolean> function) {
+    private static void getSetBool(AttribManager manager, Player player, Paths args, String Name, BiConsumer<ItemAttrib, Boolean> consumer, Function<ItemAttrib, Boolean> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
                 boolean value = Boolean.valueOf(args.first());
-                Attributes attrib = manager.createAttrib(stack);
+                ItemAttrib attrib = manager.createAttrib(stack);
                 player.setItemInHand(stack);
                 consumer.accept(attrib, value);
                 manager.sendKey(player, "set" + Name, value);
             } else {
-                Attributes attrib = manager.getAttrib(stack);
+                ItemAttrib attrib = manager.getAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetString(AttribManager manager, Player player, Paths args, String Name, BiConsumer<Attributes, String> consumer, Function<Attributes, String> function) {
+    private static void getSetString(AttribManager manager, Player player, Paths args, String Name, BiConsumer<ItemAttrib, String> consumer, Function<ItemAttrib, String> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
                 String value = args.first();
-                Attributes attrib = manager.createAttrib(stack);
+                ItemAttrib attrib = manager.createAttrib(stack);
                 player.setItemInHand(stack);
                 consumer.accept(attrib, value);
                 manager.sendKey(player, "set" + Name, value);
             } else {
-                Attributes attrib = manager.getAttrib(stack);
+                ItemAttrib attrib = manager.getAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }

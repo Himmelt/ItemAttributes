@@ -4,7 +4,7 @@ import net.minecraft.server.v1_7_R4.EntityPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.soraworld.attrib.data.Attributes;
+import org.soraworld.attrib.data.ItemAttrib;
 import org.soraworld.attrib.task.PlayerTickTask;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Setting;
@@ -18,35 +18,12 @@ import java.util.*;
 
 public class AttribManager extends SpigotManager {
 
-    public static final int TAG_END = 0;
-    public static final int TAG_BYTE = 1;
-    public static final int TAG_SHORT = 2;
-    public static final int TAG_INT = 3;
-    public static final int TAG_LONG = 4;
-    public static final int TAG_FLOAT = 5;
-    public static final int TAG_DOUBLE = 6;
-    public static final int TAG_BYTE_A = 7;
-    public static final int TAG_STRING = 8;
-    public static final int TAG_LIST = 9;
-    public static final int TAG_COMP = 10;
-    public static final int TAG_INT_A = 11;
-    public static final String ATTRIBS = "attribs";
-
-    private static final Attributes serializer = new Attributes();
-
-    // &f&r&f&r
-    private static String SPLIT = ChatColor.COLOR_CHAR + "f" + ChatColor.COLOR_CHAR + "r" + ChatColor.COLOR_CHAR + "f" + ChatColor.COLOR_CHAR + "r";
-    private static String COLOR_STRING = "" + ChatColor.COLOR_CHAR;
-
-    private HashMap<Integer, Attributes> items = new HashMap<>();
-
-    private final Path itemconfile;
-
-    private HashMap<String, Integer> ids = new HashMap<>();
-
-    private HashMap<UUID, PlayerTickTask> tasks = new HashMap<>();
-
     private int NextID = 0;
+    private final Path itemsFile;
+    private HashMap<String, Integer> ids = new HashMap<>();
+    private HashMap<Integer, ItemAttrib> items = new HashMap<>();
+    private HashMap<UUID, PlayerTickTask> tasks = new HashMap<>();
+    private static final ItemAttrib serializer = new ItemAttrib();
 
     @Setting
     private byte updateTicks = 10;
@@ -59,7 +36,7 @@ public class AttribManager extends SpigotManager {
 
     public AttribManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
-        itemconfile = path.resolve("items.conf");
+        itemsFile = path.resolve("items.conf");
     }
 
     @Nonnull
@@ -67,23 +44,23 @@ public class AttribManager extends SpigotManager {
         return ChatColor.DARK_GREEN;
     }
 
-    public Attributes getAttrib(ItemStack stack) {
+    public ItemAttrib getAttrib(ItemStack stack) {
         return items.get(getId(stack));
     }
 
     public void beforeLoad() {
-        options.registerType(new Attributes());
+        options.registerType(new ItemAttrib());
     }
 
     public void loadItems() {
-        FileNode node = new FileNode(itemconfile.toFile(), options);
+        FileNode node = new FileNode(itemsFile.toFile(), options);
         try {
             node.load(false);
             items.clear();
             for (String key : node.keys()) {
                 try {
                     int id = Integer.valueOf(key);
-                    Attributes attrib = serializer.deserialize(Attributes.class, node.get(key));
+                    ItemAttrib attrib = serializer.deserialize(ItemAttrib.class, node.get(key));
                     if (attrib != null) items.put(id, attrib);
                 } catch (Throwable e) {
                     e.printStackTrace();
@@ -106,9 +83,9 @@ public class AttribManager extends SpigotManager {
     }
 
     public void saveItems() {
-        FileNode node = new FileNode(itemconfile.toFile(), options);
-        for (Map.Entry<Integer, Attributes> entry : items.entrySet()) {
-            node.set(entry.getKey().toString(), serializer.serialize(Attributes.class, entry.getValue(), options));
+        FileNode node = new FileNode(itemsFile.toFile(), options);
+        for (Map.Entry<Integer, ItemAttrib> entry : items.entrySet()) {
+            node.set(entry.getKey().toString(), serializer.serialize(ItemAttrib.class, entry.getValue(), options));
         }
         try {
             node.save();
@@ -162,7 +139,7 @@ public class AttribManager extends SpigotManager {
         return player.by();
     }
 
-    public Attributes createAttrib(ItemStack stack) {
+    public ItemAttrib createAttrib(ItemStack stack) {
         ItemMeta meta = stack.getItemMeta();
         List<String> lore = meta.getLore();
         if (lore == null) lore = new ArrayList<>();
@@ -175,14 +152,14 @@ public class AttribManager extends SpigotManager {
                     lore.set(0, "" + ChatColor.RESET + ChatColor.AQUA + "attrib-id:" + id);
                     meta.setLore(lore);
                     stack.setItemMeta(meta);
-                    Attributes attrib = items.get(id);
+                    ItemAttrib attrib = items.get(id);
                     if (attrib != null) return attrib;
-                    attrib = new Attributes();
+                    attrib = new ItemAttrib();
                     items.put(id, attrib);
                     return attrib;
                 } catch (Throwable e) {
                     e.printStackTrace();
-                    Attributes attrib = new Attributes();
+                    ItemAttrib attrib = new ItemAttrib();
                     while (items.containsKey(NextID)) NextID++;
                     items.put(NextID, attrib);
                     lore.set(0, "" + ChatColor.RESET + ChatColor.AQUA + "attrib-id:" + NextID);
@@ -192,7 +169,7 @@ public class AttribManager extends SpigotManager {
                 }
             }
         }
-        Attributes attrib = new Attributes();
+        ItemAttrib attrib = new ItemAttrib();
         while (items.containsKey(NextID)) NextID++;
         items.put(NextID, attrib);
         lore.add(0, "" + ChatColor.RESET + ChatColor.AQUA + "attrib-id:" + NextID);
@@ -214,5 +191,10 @@ public class AttribManager extends SpigotManager {
         PlayerTickTask task = tasks.get(player.getUniqueId());
         if (task != null) task.cancel();
         tasks.remove(player.getUniqueId());
+    }
+
+    public ItemAttrib getPlayerAttrib(Player player) {
+        PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> new PlayerTickTask(AttribManager.this, player));
+        return task.getAttrib();
     }
 }

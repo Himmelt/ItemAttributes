@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Attributes implements TypeSerializer<Attributes> {
+public class ItemAttrib implements TypeSerializer<ItemAttrib> {
 
     public String name;
     @Setting
@@ -28,19 +28,19 @@ public class Attributes implements TypeSerializer<Attributes> {
     @Setting
     public float block_chance = 0, block_ratio = 0;
     @Setting
-    public float crit_chance = 0, crit_ratio = 0;
+    public float critChance = 0, critRatio = 0;
     @Setting
     public float suck_chance = 0, suck_ratio = 0;
     @Setting
     public float onekill_chance = 0, onekill_ratio = 0;
     @Setting
-    public float thorn_chance = 0, thorn_ratio = 0;
+    public float thornChance = 0, thornRatio = 0;
     @Setting
-    public float immortal_chance = 0;
+    public float immortalChance = 0;
     @Setting
     public float rage_health = 0, rage_ratio = 0;
     @Setting
-    public float dodge_chance = 0;
+    public float dodgeChance = 0;
     @Setting
     public boolean bind_enable = false;
     @Setting
@@ -54,15 +54,15 @@ public class Attributes implements TypeSerializer<Attributes> {
     @Setting
     public List<String> skills = new ArrayList<>();
 
-    public Attributes deserialize(@Nonnull Type type, @Nonnull Node node) {
-        Attributes attributes = new Attributes();
+    public ItemAttrib deserialize(@Nonnull Type type, @Nonnull Node node) {
+        ItemAttrib attributes = new ItemAttrib();
         if (node instanceof NodeMap) {
             ((NodeMap) node).modify(attributes);
         }
         return attributes;
     }
 
-    public Node serialize(@Nonnull Type type, Attributes value, @Nonnull Options options) {
+    public Node serialize(@Nonnull Type type, ItemAttrib value, @Nonnull Options options) {
         NodeMap node = new NodeMap(options);
         if (value != null) {
             if (value.health != 0) node.set("health", value.health);
@@ -74,18 +74,18 @@ public class Attributes implements TypeSerializer<Attributes> {
             if (value.armor != 0) node.set("armor", value.armor);
             if (value.block_chance != 0) node.set("block_chance", value.block_chance);
             if (value.block_ratio != 0) node.set("block_ratio", value.block_ratio);
-            if (value.crit_chance != 0) node.set("crit_chance", value.crit_chance);
-            if (value.crit_ratio != 0) node.set("crit_ratio", value.crit_ratio);
+            if (value.critChance != 0) node.set("crit_chance", value.critChance);
+            if (value.critRatio != 0) node.set("crit_ratio", value.critRatio);
             if (value.suck_chance != 0) node.set("suck_chance", value.suck_chance);
             if (value.suck_ratio != 0) node.set("suck_ratio", value.suck_ratio);
             if (value.onekill_chance != 0) node.set("onekill_chance", value.onekill_chance);
             if (value.onekill_ratio != 0) node.set("onekill_ratio", value.onekill_ratio);
-            if (value.thorn_chance != 0) node.set("thorn_chance", value.thorn_chance);
-            if (value.thorn_ratio != 0) node.set("thorn_ratio", value.thorn_ratio);
-            if (value.immortal_chance != 0) node.set("immortal_chance", value.immortal_chance);
+            if (value.thornChance != 0) node.set("thorn_chance", value.thornChance);
+            if (value.thornRatio != 0) node.set("thorn_ratio", value.thornRatio);
+            if (value.immortalChance != 0) node.set("immortalChance", value.immortalChance);
             if (value.rage_health != 0) node.set("rage_health", value.rage_health);
             if (value.rage_ratio != 0) node.set("rage_ratio", value.rage_ratio);
-            if (value.dodge_chance != 0) node.set("dodge_chance", value.dodge_chance);
+            if (value.dodgeChance != 0) node.set("dodge_chance", value.dodgeChance);
             node.set("bind_enable", value.bind_enable);
             if (value.owner != null && !value.owner.isEmpty()) node.set("owner", value.owner);
             if (value.perm != null && !value.perm.isEmpty()) node.set("perm", value.perm);
@@ -110,6 +110,6 @@ public class Attributes implements TypeSerializer<Attributes> {
 
     @Nonnull
     public Type getRegType() {
-        return Attributes.class;
+        return ItemAttrib.class;
     }
 }
