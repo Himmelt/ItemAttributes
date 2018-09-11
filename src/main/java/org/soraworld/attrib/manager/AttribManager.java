@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.soraworld.attrib.data.Attributes;
-import org.soraworld.attrib.task.PlayerSecond;
+import org.soraworld.attrib.task.PlayerTickTask;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.manager.SpigotManager;
@@ -44,10 +44,12 @@ public class AttribManager extends SpigotManager {
 
     private HashMap<String, Integer> ids = new HashMap<>();
 
-    private HashMap<UUID, PlayerSecond> tasks = new HashMap<>();
+    private HashMap<UUID, PlayerTickTask> tasks = new HashMap<>();
 
     private int NextID = 0;
 
+    @Setting
+    private byte updateTicks = 10;
     @Setting(comment = "comment.autoUpdate")
     private boolean autoUpdate = false;
     @Setting(comment = "comment.accumulateDodge")
@@ -200,16 +202,16 @@ public class AttribManager extends SpigotManager {
     }
 
     public void startTask(Player player) {
-        PlayerSecond task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> new PlayerSecond(AttribManager.this, player));
+        PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> new PlayerTickTask(AttribManager.this, player));
         try {
-            task.runTaskTimer(plugin, 1, 20);
+            task.runTaskTimer(plugin, 1, updateTicks);
         } catch (Throwable e) {
             if (debug) e.printStackTrace();
         }
     }
 
     public void stopTask(Player player) {
-        PlayerSecond task = tasks.get(player.getUniqueId());
+        PlayerTickTask task = tasks.get(player.getUniqueId());
         if (task != null) task.cancel();
         tasks.remove(player.getUniqueId());
     }
