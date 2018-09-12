@@ -112,10 +112,10 @@ public class AttribManager extends SpigotManager {
                 int index2 = first.indexOf("bind:");
                 if (index1 >= 0) {
                     if (index2 > index1) {
-                        id = Integer.valueOf(first.substring(index1 + 10), index2);
+                        id = Integer.valueOf(first.substring(index1 + 10, index2).trim());
                         owner = first.substring(index2 + 5);
                     } else {
-                        id = Integer.valueOf(first.substring(index1 + 10));
+                        id = Integer.valueOf(first.substring(index1 + 10).trim());
                     }
                     return new LoreInfo(id, owner, getItemAttrib(id));
                 }

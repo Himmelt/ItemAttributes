@@ -4,13 +4,9 @@ import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -35,38 +31,38 @@ public class EventListener implements Listener {
         this.manager = manager;
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerMove(PlayerMoveEvent event) {
-        //updateArmor(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onPlayerItemHeld(PlayerItemHeldEvent event) {
-    }
-
-    /**
-     * 当玩家右键装备护甲时更新属性.
-     */
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.hasItem()) checkItemAccess(event.getPlayer(), event.getItem(), event);
+        if (event.hasItem()) {
+            Player player = event.getPlayer();
+            LoreInfo info = getInfo(event.getItem());
+            if (info.attrib != null) {
+                if (info.attrib.perm != null && !info.attrib.perm.isEmpty()) {
+                    if (!player.hasPermission(info.attrib.perm)) {
+                        event.setCancelled(true);
+                        manager.sendKey(player, "noItemPerm", info.attrib.perm);
+                    }
+                }
+                if (info.attrib.bindEnable) {
+                    if (info.owner != null && !info.owner.isEmpty()) {
+                        if (!info.owner.equals(player.getName())) {
+                            event.setCancelled(true);
+                            manager.sendKey(player, "notItemOwner");
+                        }
+                    } else {
+                        ItemStack stack = event.getItem();
+                        ItemMeta meta = stack.getItemMeta();
+                        List<String> lore = meta.getLore();
+                        lore.set(0, lore.get(0) + " bind:" + player.getName());
+                        meta.setLore(lore);
+                        stack.setItemMeta(meta);
+                        manager.sendKey(player, "itemBind");
+                    }
+                }
+            }
+        }
     }
 
-    /**
-     * 当玩家操作护甲时更新属性.
-     */
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerInventoryClick(InventoryClickEvent event) {
-        //checkItemAccess((Player) event.getWhoClicked(), event.getCurrentItem(), event);
-    }
-
-    @EventHandler
-    public void on(InventoryCloseEvent event) {
-    }
-
-    /**
-     * 物品消耗耐久时检查 不灭 属性.
-     */
     @EventHandler
     public void onPlayerItemDamage(PlayerItemDamageEvent event) {
         ItemAttrib attrib = getItemAttrib(event.getItem());
@@ -76,13 +72,6 @@ public class EventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(PlayerItemBreakEvent event) {
-    }
-
-    /**
-     * TODO 攻击力相关的属性只能设置在武器上，防御相关的属性只能设置在护甲上
-     */
     @EventHandler
     public void onEntityDamage(EntityDamageByEntityEvent event) {
         Entity e1 = event.getDamager();
@@ -110,7 +99,7 @@ public class EventListener implements Listener {
                 Player victim = (Player) e2;
                 PlayerAttrib attrib = getPlayerAttrib(victim);
                 if (attrib.dodgeChance > 0 && attrib.dodgeChance > random.nextFloat()) {
-                    event.setDamage(0);// dodge will not cause thorn
+                    event.setDamage(0);
                     return;
                 }
                 damage -= attrib.armor;
@@ -142,11 +131,7 @@ public class EventListener implements Listener {
         manager.stopTask(event.getPlayer());
     }
 
-    @EventHandler
-    public void onPlayerConsumeItem(PlayerItemConsumeEvent event) {
-    }
-
-    private PlayerAttrib getPlayerAttrib(Player player) {
+    private static PlayerAttrib getPlayerAttrib(Player player) {
         PlayerAttrib pa = new PlayerAttrib();
         LoreInfo info = getInfo(player.getItemInHand());
         if (info.attrib != null && info.canUse(player)) {
@@ -173,44 +158,7 @@ public class EventListener implements Listener {
         return pa;
     }
 
-    private void checkItemAccess(Player player, ItemStack stack, Cancellable event) {
-        ItemAttrib item = getItemAttrib(stack);
-        if (item != null) {
-            if (item.perm != null && !item.perm.isEmpty() && !player.hasPermission(item.perm)) {
-                event.setCancelled(true);
-                manager.sendKey(player, "noItemPerm");
-                return;
-            }
-            if (item.bindEnable) {
-                String owner = getOwner(stack);
-                if (owner != null && !owner.isEmpty()) {
-                    if (!owner.equals(player.getName())) {
-                        event.setCancelled(true);
-                        manager.sendKey(player, "notItemOwner");
-                    }
-                } else setOwner(stack, player.getName());
-            }
-        }
-    }
-
     private static boolean isHoldRight(Player player) {
         return ((CraftPlayer) player).getHandle().by();
-    }
-
-    private static String getOwner(ItemStack stack) {
-        ItemMeta meta = stack.getItemMeta();
-        List<String> lore = meta.getLore();
-        String line = lore.get(0);
-        int index = line.indexOf("bind:");
-        return index >= 0 ? line.substring(line.indexOf("bind:") + 5) : null;
-    }
-
-    private static ItemStack setOwner(ItemStack stack, String owner) {
-        ItemMeta meta = stack.getItemMeta();
-        List<String> lore = meta.getLore();
-        lore.set(0, lore.get(0) + "|bind:" + owner);
-        meta.setLore(lore);
-        stack.setItemMeta(meta);
-        return stack;
     }
 }
