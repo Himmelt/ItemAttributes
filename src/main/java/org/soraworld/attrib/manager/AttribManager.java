@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.soraworld.attrib.data.ItemAttrib;
+import org.soraworld.attrib.data.LoreInfo;
 import org.soraworld.attrib.task.PlayerTickTask;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Setting;
@@ -21,7 +22,7 @@ public class AttribManager extends SpigotManager {
     private int NextID = 0;
     private final Path itemsFile;
     private HashMap<String, Integer> ids = new HashMap<>();
-    private HashMap<Integer, ItemAttrib> items = new HashMap<>();
+    private static HashMap<Integer, ItemAttrib> items = new HashMap<>();
     private HashMap<UUID, PlayerTickTask> tasks = new HashMap<>();
     private static final ItemAttrib serializer = new ItemAttrib();
 
@@ -44,8 +45,12 @@ public class AttribManager extends SpigotManager {
         return ChatColor.DARK_GREEN;
     }
 
-    public ItemAttrib getItemAttrib(ItemStack stack) {
-        return items.get(getId(stack));
+    public static ItemAttrib getItemAttrib(ItemStack stack) {
+        return getInfo(stack).attrib;
+    }
+
+    public static ItemAttrib getItemAttrib(int id) {
+        return items.get(id);
     }
 
     public void beforeLoad() {
@@ -94,23 +99,29 @@ public class AttribManager extends SpigotManager {
         }
     }
 
-    public static int getId(ItemStack stack) {
-        if (stack == null) return -1;
-        if (stack.hasItemMeta()) {
+    private static final LoreInfo BAD_INFO = new LoreInfo(-1, null, null);
+
+    public static LoreInfo getInfo(ItemStack stack) {
+        if (stack != null && stack.hasItemMeta()) {
             ItemMeta meta = stack.getItemMeta();
             if (meta.hasLore()) {
+                int id;
+                String owner = null;
                 String first = meta.getLore().get(0);
-                int index = first.indexOf("attrib-id:");
-                if (index >= 0) {
-                    try {
-                        return Integer.valueOf(first.substring(index + 10));
-                    } catch (Throwable ignored) {
-                        return -1;
+                int index1 = first.indexOf("attrib id:");
+                int index2 = first.indexOf("bind:");
+                if (index1 >= 0) {
+                    if (index2 > index1) {
+                        id = Integer.valueOf(first.substring(index1 + 10), index2);
+                        owner = first.substring(index2 + 5);
+                    } else {
+                        id = Integer.valueOf(first.substring(index1 + 10));
                     }
+                    return new LoreInfo(id, owner, getItemAttrib(id));
                 }
             }
         }
-        return -1;
+        return BAD_INFO;
     }
 
     /**
@@ -197,4 +208,5 @@ public class AttribManager extends SpigotManager {
         PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> new PlayerTickTask(AttribManager.this, player));
         return task.getAttrib();
     }
+
 }

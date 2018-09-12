@@ -15,11 +15,15 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.soraworld.attrib.data.ItemAttrib;
+import org.soraworld.attrib.data.LoreInfo;
 import org.soraworld.attrib.data.PlayerAttrib;
 import org.soraworld.attrib.manager.AttribManager;
 
 import java.util.List;
 import java.util.Random;
+
+import static org.soraworld.attrib.manager.AttribManager.getInfo;
+import static org.soraworld.attrib.manager.AttribManager.getItemAttrib;
 
 public class EventListener implements Listener {
 
@@ -65,7 +69,7 @@ public class EventListener implements Listener {
      */
     @EventHandler
     public void onPlayerItemDamage(PlayerItemDamageEvent event) {
-        ItemAttrib attrib = manager.getItemAttrib(event.getItem());
+        ItemAttrib attrib = getItemAttrib(event.getItem());
         if (attrib != null && attrib.immortalChance > 0 && random.nextFloat() < attrib.immortalChance) {
             event.setDamage(0);
             event.getPlayer().updateInventory();
@@ -80,7 +84,7 @@ public class EventListener implements Listener {
      * TODO 攻击力相关的属性只能设置在武器上，防御相关的属性只能设置在护甲上
      */
     @EventHandler
-    public void onPlayerAttack(EntityDamageByEntityEvent event) {
+    public void onEntityDamage(EntityDamageByEntityEvent event) {
         Entity e1 = event.getDamager();
         Entity e2 = event.getEntity();
         if (e1 instanceof Damageable && e2 instanceof Damageable) {
@@ -142,40 +146,35 @@ public class EventListener implements Listener {
     public void onPlayerConsumeItem(PlayerItemConsumeEvent event) {
     }
 
-
-    private boolean isHoldRight(Player player) {
-        return ((CraftPlayer) player).getHandle().by();
-    }
-
     private PlayerAttrib getPlayerAttrib(Player player) {
-        PlayerAttrib pAttrib = new PlayerAttrib();
-        ItemAttrib attrib = manager.getItemAttrib(player.getItemInHand());
-        if (attrib != null) {
-            pAttrib.blockChance = attrib.blockChance;
-            pAttrib.blockRation = attrib.blockRatio;
-            pAttrib.critChance = attrib.critChance;
-            pAttrib.critRation = attrib.critRatio;
-            pAttrib.onekillChance = attrib.onekillChance;
-            pAttrib.onekillRation = attrib.onekillRatio;
-            pAttrib.suckChance = attrib.suckChance;
-            pAttrib.suckRation = attrib.suckRatio;
-            pAttrib.rageHealth = attrib.rageHealth;
-            pAttrib.rageRation = attrib.rageRatio;
+        PlayerAttrib pa = new PlayerAttrib();
+        LoreInfo info = getInfo(player.getItemInHand());
+        if (info.attrib != null && info.canUse(player)) {
+            pa.blockChance = info.attrib.blockChance;
+            pa.blockRation = info.attrib.blockRatio;
+            pa.critChance = info.attrib.critChance;
+            pa.critRation = info.attrib.critRatio;
+            pa.onekillChance = info.attrib.onekillChance;
+            pa.onekillRation = info.attrib.onekillRatio;
+            pa.suckChance = info.attrib.suckChance;
+            pa.suckRation = info.attrib.suckRatio;
+            pa.rageHealth = info.attrib.rageHealth;
+            pa.rageRation = info.attrib.rageRatio;
         }
         for (ItemStack stack : player.getInventory().getArmorContents()) {
-            ItemAttrib itemAttrib = manager.getItemAttrib(stack);
-            if (itemAttrib != null) {
-                pAttrib.armor += itemAttrib.armor;
-                pAttrib.dodgeChance += itemAttrib.dodgeChance;
-                pAttrib.thornChance += itemAttrib.thornChance;
-                pAttrib.thornRatio += itemAttrib.thornRatio;
+            info = getInfo(stack);
+            if (info.attrib != null && info.canUse(player)) {
+                pa.armor += info.attrib.armor;
+                pa.dodgeChance += info.attrib.dodgeChance;
+                pa.thornChance += info.attrib.thornChance;
+                pa.thornRatio += info.attrib.thornRatio;
             }
         }
-        return pAttrib;
+        return pa;
     }
 
     private void checkItemAccess(Player player, ItemStack stack, Cancellable event) {
-        ItemAttrib item = manager.getItemAttrib(stack);
+        ItemAttrib item = getItemAttrib(stack);
         if (item != null) {
             if (item.perm != null && !item.perm.isEmpty() && !player.hasPermission(item.perm)) {
                 event.setCancelled(true);
@@ -194,7 +193,11 @@ public class EventListener implements Listener {
         }
     }
 
-    private String getOwner(ItemStack stack) {
+    private static boolean isHoldRight(Player player) {
+        return ((CraftPlayer) player).getHandle().by();
+    }
+
+    private static String getOwner(ItemStack stack) {
         ItemMeta meta = stack.getItemMeta();
         List<String> lore = meta.getLore();
         String line = lore.get(0);
@@ -202,7 +205,7 @@ public class EventListener implements Listener {
         return index >= 0 ? line.substring(line.indexOf("bind:") + 5) : null;
     }
 
-    private ItemStack setOwner(ItemStack stack, String owner) {
+    private static ItemStack setOwner(ItemStack stack, String owner) {
         ItemMeta meta = stack.getItemMeta();
         List<String> lore = meta.getLore();
         lore.set(0, lore.get(0) + "|bind:" + owner);
