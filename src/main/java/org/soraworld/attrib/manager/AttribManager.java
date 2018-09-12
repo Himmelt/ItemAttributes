@@ -44,7 +44,7 @@ public class AttribManager extends SpigotManager {
         return ChatColor.DARK_GREEN;
     }
 
-    public ItemAttrib getAttrib(ItemStack stack) {
+    public ItemAttrib getItemAttrib(ItemStack stack) {
         return items.get(getId(stack));
     }
 

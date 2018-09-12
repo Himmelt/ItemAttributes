@@ -48,12 +48,12 @@ public class PlayerTickTask extends BukkitRunnable {
         double maxHealth = 0.0D, moveSpeed = 0.0D, attackDamage = 0.0D, knockResist = 0.0D;
 
         // Check ItemInHand
-        attrib = manager.getAttrib(player.getItemInHand());
+        attrib = manager.getItemAttrib(player.getItemInHand());
         if (attrib != null) attackDamage += attrib.attack;
 
         // Check Armors
         for (ItemStack stack : player.getInventory().getArmorContents()) {
-            attrib = manager.getAttrib(stack);
+            attrib = manager.getItemAttrib(stack);
             if (attrib != null) {
                 armor += attrib.armor;
                 maxHealth += attrib.health;

@@ -142,10 +142,10 @@ public final class CommandAttrib {
                 (Player) sender,
                 args, "Block",
                 0, 100, 0, 100,
-                (attrib, value) -> attrib.block_chance = value / 100.0F,
-                (attrib, value) -> attrib.block_ratio = value / 100.0F,
-                attrib -> (int) (attrib.block_chance * 100),
-                attrib -> (int) (attrib.block_ratio * 100)
+                (attrib, value) -> attrib.blockChance = value / 100.0F,
+                (attrib, value) -> attrib.blockRatio = value / 100.0F,
+                attrib -> (int) (attrib.blockChance * 100),
+                attrib -> (int) (attrib.blockRatio * 100)
         );
     }
 
@@ -195,10 +195,10 @@ public final class CommandAttrib {
                 (Player) sender,
                 args, "Suck",
                 0, 100, 0, Integer.MAX_VALUE,
-                (attrib, value) -> attrib.suck_chance = value / 100.0F,
-                (attrib, value) -> attrib.suck_ratio = value / 100.0F,
-                attrib -> (int) (attrib.suck_chance * 100),
-                attrib -> (int) (attrib.suck_ratio * 100)
+                (attrib, value) -> attrib.suckChance = value / 100.0F,
+                (attrib, value) -> attrib.suckRatio = value / 100.0F,
+                attrib -> (int) (attrib.suckChance * 100),
+                attrib -> (int) (attrib.suckRatio * 100)
         );
     }
 
@@ -213,10 +213,10 @@ public final class CommandAttrib {
                 (Player) sender,
                 args, "OneKill",
                 0, 100, 0, 100,
-                (attrib, value) -> attrib.onekill_chance = value / 100.0F,
-                (attrib, value) -> attrib.onekill_ratio = value / 100.0F,
-                attrib -> (int) (attrib.onekill_chance * 100),
-                attrib -> (int) (attrib.onekill_ratio * 100)
+                (attrib, value) -> attrib.onekillChance = value / 100.0F,
+                (attrib, value) -> attrib.onekillRatio = value / 100.0F,
+                attrib -> (int) (attrib.onekillChance * 100),
+                attrib -> (int) (attrib.onekillRatio * 100)
         );
     }
 
@@ -261,10 +261,10 @@ public final class CommandAttrib {
                 (Player) sender,
                 args, "Rage",
                 0, 100, 0, Integer.MAX_VALUE,
-                (attrib, value) -> attrib.rage_health = value / 100.0F,
-                (attrib, value) -> attrib.rage_ratio = value / 100.0F,
-                attrib -> (int) (attrib.rage_health * 100),
-                attrib -> (int) (attrib.rage_ratio * 100)
+                (attrib, value) -> attrib.rageHealth = value / 100.0F,
+                (attrib, value) -> attrib.rageRatio = value / 100.0F,
+                attrib -> (int) (attrib.rageHealth * 100),
+                attrib -> (int) (attrib.rageRatio * 100)
         );
     }
 
@@ -274,8 +274,8 @@ public final class CommandAttrib {
                 (AttribManager) self.manager,
                 (Player) sender,
                 args, "Bind",
-                (attrib, value) -> attrib.bind_enable = value,
-                attrib -> attrib.bind_enable
+                (attrib, value) -> attrib.bindEnable = value,
+                attrib -> attrib.bindEnable
         );
     }
 
@@ -340,7 +340,7 @@ public final class CommandAttrib {
                     manager.sendKey(player, "invalidInt");
                 }
             } else {
-                ItemAttrib attrib = manager.getAttrib(stack);
+                ItemAttrib attrib = manager.getItemAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
@@ -365,7 +365,7 @@ public final class CommandAttrib {
                     manager.sendKey(player, "invalidInt");
                 }
             } else {
-                ItemAttrib attrib = manager.getAttrib(stack);
+                ItemAttrib attrib = manager.getItemAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, fun1.apply(attrib), fun2.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
@@ -387,7 +387,7 @@ public final class CommandAttrib {
                     manager.sendKey(player, "invalidFloat");
                 }
             } else {
-                ItemAttrib attrib = manager.getAttrib(stack);
+                ItemAttrib attrib = manager.getItemAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
@@ -404,7 +404,7 @@ public final class CommandAttrib {
                 consumer.accept(attrib, value);
                 manager.sendKey(player, "set" + Name, value);
             } else {
-                ItemAttrib attrib = manager.getAttrib(stack);
+                ItemAttrib attrib = manager.getItemAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
@@ -421,7 +421,7 @@ public final class CommandAttrib {
                 consumer.accept(attrib, value);
                 manager.sendKey(player, "set" + Name, value);
             } else {
-                ItemAttrib attrib = manager.getAttrib(stack);
+                ItemAttrib attrib = manager.getItemAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }

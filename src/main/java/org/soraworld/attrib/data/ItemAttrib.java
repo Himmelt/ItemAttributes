@@ -26,25 +26,25 @@ public class ItemAttrib implements TypeSerializer<ItemAttrib> {
     @Setting
     public int armor = 0;
     @Setting
-    public float block_chance = 0, block_ratio = 0;
+    public float blockChance = 0, blockRatio = 0;
     @Setting
     public float critChance = 0, critRatio = 0;
     @Setting
-    public float suck_chance = 0, suck_ratio = 0;
+    public float suckChance = 0, suckRatio = 0;
     @Setting
-    public float onekill_chance = 0, onekill_ratio = 0;
+    public float onekillChance = 0, onekillRatio = 0;
     @Setting
     public float thornChance = 0, thornRatio = 0;
     @Setting
     public float immortalChance = 0;
     @Setting
-    public float rage_health = 0, rage_ratio = 0;
+    public float rageHealth = 0, rageRatio = 0;
     @Setting
     public float dodgeChance = 0;
     @Setting
-    public boolean bind_enable = false;
-    @Setting
-    public String owner = null;
+    public boolean bindEnable = false;
+    // TODO owner is specific variable
+    // public String owner = null;
     @Setting
     public String perm = null;
     @Setting
@@ -72,22 +72,21 @@ public class ItemAttrib implements TypeSerializer<ItemAttrib> {
             if (value.attack != 0) node.set("attack", value.attack);
             if (value.knock != 0) node.set("knock", value.knock);
             if (value.armor != 0) node.set("armor", value.armor);
-            if (value.block_chance != 0) node.set("block_chance", value.block_chance);
-            if (value.block_ratio != 0) node.set("block_ratio", value.block_ratio);
-            if (value.critChance != 0) node.set("crit_chance", value.critChance);
-            if (value.critRatio != 0) node.set("crit_ratio", value.critRatio);
-            if (value.suck_chance != 0) node.set("suck_chance", value.suck_chance);
-            if (value.suck_ratio != 0) node.set("suck_ratio", value.suck_ratio);
-            if (value.onekill_chance != 0) node.set("onekill_chance", value.onekill_chance);
-            if (value.onekill_ratio != 0) node.set("onekill_ratio", value.onekill_ratio);
-            if (value.thornChance != 0) node.set("thorn_chance", value.thornChance);
-            if (value.thornRatio != 0) node.set("thorn_ratio", value.thornRatio);
+            if (value.blockChance != 0) node.set("blockChance", value.blockChance);
+            if (value.blockRatio != 0) node.set("blockRatio", value.blockRatio);
+            if (value.critChance != 0) node.set("critChance", value.critChance);
+            if (value.critRatio != 0) node.set("critRatio", value.critRatio);
+            if (value.suckChance != 0) node.set("suckChance", value.suckChance);
+            if (value.suckRatio != 0) node.set("suckRatio", value.suckRatio);
+            if (value.onekillChance != 0) node.set("onekillChance", value.onekillChance);
+            if (value.onekillRatio != 0) node.set("onekillRatio", value.onekillRatio);
+            if (value.thornChance != 0) node.set("thornChance", value.thornChance);
+            if (value.thornRatio != 0) node.set("thornRatio", value.thornRatio);
             if (value.immortalChance != 0) node.set("immortalChance", value.immortalChance);
-            if (value.rage_health != 0) node.set("rage_health", value.rage_health);
-            if (value.rage_ratio != 0) node.set("rage_ratio", value.rage_ratio);
-            if (value.dodgeChance != 0) node.set("dodge_chance", value.dodgeChance);
-            node.set("bind_enable", value.bind_enable);
-            if (value.owner != null && !value.owner.isEmpty()) node.set("owner", value.owner);
+            if (value.rageHealth != 0) node.set("rageHealth", value.rageHealth);
+            if (value.rageRatio != 0) node.set("rageRatio", value.rageRatio);
+            if (value.dodgeChance != 0) node.set("dodgeChance", value.dodgeChance);
+            node.set("bindEnable", value.bindEnable);
             if (value.perm != null && !value.perm.isEmpty()) node.set("perm", value.perm);
             if (value.potions != null && !value.potions.isEmpty()) {
                 NodeList list = new NodeList(options);
