@@ -9,15 +9,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.soraworld.attrib.data.ItemAttrib;
-import org.soraworld.attrib.manager.AttribManager;
 
 import java.util.UUID;
+
+import static org.soraworld.attrib.manager.AttribManager.getItemAttrib;
 
 public class PlayerTickTask extends BukkitRunnable {
 
     private final Player player;
-    private final ItemAttrib pAttrib;
-    private final AttribManager manager;
 
     private AttributeInstance maxHealthInstance;
     private AttributeInstance moveSpeedInstance;
@@ -29,10 +28,8 @@ public class PlayerTickTask extends BukkitRunnable {
     private static final UUID attackDamageUUID = UUID.fromString("b2123860-0b68-49b2-a631-d13b6a27f686");
     private static final UUID knockResistUUID = UUID.fromString("96d8c6f6-41b6-42ea-8a1b-cfa3131b7d72");
 
-    public PlayerTickTask(AttribManager manager, Player player) {
+    public PlayerTickTask(Player player) {
         this.player = player;
-        this.manager = manager;
-        this.pAttrib = new ItemAttrib();
         // TODO 检查 respawn 和 切换世界 重新加入 EntityPlayer 是否改变
         EntityPlayer handle = ((CraftPlayer) player).getHandle();
         maxHealthInstance = handle.getAttributeInstance(GenericAttributes.maxHealth);
@@ -44,18 +41,16 @@ public class PlayerTickTask extends BukkitRunnable {
     public void run() {
         ItemAttrib attrib;
         float regain = 0.0F, flyspeed = 0.1F;
-        int armor = 0;
         double maxHealth = 0.0D, moveSpeed = 0.0D, attackDamage = 0.0D, knockResist = 0.0D;
 
         // Check ItemInHand
-        attrib = manager.getItemAttrib(player.getItemInHand());
+        attrib = getItemAttrib(player.getItemInHand());
         if (attrib != null) attackDamage += attrib.attack;
 
         // Check Armors
         for (ItemStack stack : player.getInventory().getArmorContents()) {
-            attrib = manager.getItemAttrib(stack);
+            attrib = getItemAttrib(stack);
             if (attrib != null) {
-                armor += attrib.armor;
                 maxHealth += attrib.health;
                 moveSpeed += attrib.walkspeed;
                 knockResist += attrib.knock;
@@ -84,9 +79,5 @@ public class PlayerTickTask extends BukkitRunnable {
         player.setFlySpeed(flyspeed > 1.0F ? 1.0F : flyspeed);
         maxHealth = player.getMaxHealth();
         player.setHealth(player.getHealth() + regain > maxHealth ? maxHealth : player.getHealth() + regain);
-    }
-
-    public ItemAttrib getAttrib() {
-        return pAttrib;
     }
 }

@@ -1,6 +1,5 @@
 package org.soraworld.attrib.manager;
 
-import net.minecraft.server.v1_7_R4.EntityPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -17,14 +16,18 @@ import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.*;
 
+import static org.soraworld.attrib.data.ItemAttrib.deserialize;
+import static org.soraworld.attrib.data.ItemAttrib.serialize;
+
 public class AttribManager extends SpigotManager {
 
-    private int NextID = 0;
     private final Path itemsFile;
-    private HashMap<String, Integer> ids = new HashMap<>();
-    private static HashMap<Integer, ItemAttrib> items = new HashMap<>();
+    private static int NextID = 0;
     private HashMap<UUID, PlayerTickTask> tasks = new HashMap<>();
-    private static final ItemAttrib serializer = new ItemAttrib();
+    private static HashMap<String, Integer> names = new HashMap<>();
+    private static HashMap<Integer, ItemAttrib> items = new HashMap<>();
+    private static final LoreInfo BAD_INFO = new LoreInfo((String) null, null);
+    private static final String AT_PREFIX = "" + ChatColor.RESET + ChatColor.AQUA;
 
     @Setting
     private byte updateTicks = 10;
@@ -53,28 +56,12 @@ public class AttribManager extends SpigotManager {
         return items.get(id);
     }
 
-    public void beforeLoad() {
-        options.registerType(new ItemAttrib());
-    }
-
-    public void loadItems() {
-        FileNode node = new FileNode(itemsFile.toFile(), options);
-        try {
-            node.load(false);
-            items.clear();
-            for (String key : node.keys()) {
-                try {
-                    int id = Integer.valueOf(key);
-                    ItemAttrib attrib = serializer.deserialize(ItemAttrib.class, node.get(key));
-                    if (attrib != null) items.put(id, attrib);
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            saveItems();
+    public static ItemAttrib getItemAttrib(String id) {
+        if (id.matches("\\d+")) {
+            ItemAttrib attrib = items.get(Integer.valueOf(id));
+            if (attrib != null) return attrib;
         }
+        return items.get(names.getOrDefault(id, -1));
     }
 
     public boolean load() {
@@ -87,10 +74,35 @@ public class AttribManager extends SpigotManager {
         return super.save();
     }
 
+    public void loadItems() {
+        FileNode node = new FileNode(itemsFile.toFile(), options);
+        try {
+            node.load(false);
+            items.clear();
+            for (String key : node.keys()) {
+                try {
+                    int id = Integer.valueOf(key);
+                    ItemAttrib attrib = deserialize(node.get(key), id);
+                    if (attrib != null) {
+                        items.put(attrib.id, attrib);
+                        if (attrib.name != null && !attrib.name.isEmpty()) {
+                            names.put(attrib.name, attrib.id);
+                        }
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            saveItems();
+        }
+    }
+
     public void saveItems() {
         FileNode node = new FileNode(itemsFile.toFile(), options);
         for (Map.Entry<Integer, ItemAttrib> entry : items.entrySet()) {
-            node.set(entry.getKey().toString(), serializer.serialize(ItemAttrib.class, entry.getValue(), options));
+            node.set(entry.getKey().toString(), serialize(entry.getValue(), options));
         }
         try {
             node.save();
@@ -98,8 +110,6 @@ public class AttribManager extends SpigotManager {
             e.printStackTrace();
         }
     }
-
-    private static final LoreInfo BAD_INFO = new LoreInfo(-1, null, null);
 
     public static LoreInfo getInfo(ItemStack stack) {
         if (stack != null && stack.hasItemMeta()) {
@@ -117,80 +127,67 @@ public class AttribManager extends SpigotManager {
                     } else {
                         id = Integer.valueOf(first.substring(index1 + 10).trim());
                     }
-                    return new LoreInfo(id, owner, getItemAttrib(id));
+                    return new LoreInfo(owner, getItemAttrib(id));
                 }
             }
         }
         return BAD_INFO;
     }
 
-    /**
-     * 是否自动更新物品Lore.
-     *
-     * @return 是否自动更新
-     */
-    public boolean isAutoUpdate() {
-        return autoUpdate;
-    }
-
-    /**
-     * 是否累积装备闪避几率.
-     * 如果不累积，则使用最大的几率.
-     *
-     * @return 是否累积
-     */
-    public boolean isAccumulateDodge() {
-        return accumulateDodge;
-    }
-
-    public static void updateLore(ItemStack stack) {
-    }
-
-    public boolean isHoldingRight(EntityPlayer player) {
-        return player.by();
-    }
-
-    public ItemAttrib createAttrib(ItemStack stack) {
+    public static void updateLore(ItemStack stack, LoreInfo info) {
         ItemMeta meta = stack.getItemMeta();
         List<String> lore = meta.getLore();
         if (lore == null) lore = new ArrayList<>();
         if (lore.size() > 0) {
             String first = lore.get(0);
-            int index = first.indexOf("attrib-id:");
+            int index = first.indexOf("attrib id:");
             if (index >= 0) {
-                try {
-                    int id = Integer.valueOf(first.substring(index + 10));
-                    lore.set(0, "" + ChatColor.RESET + ChatColor.AQUA + "attrib-id:" + id);
-                    meta.setLore(lore);
-                    stack.setItemMeta(meta);
-                    ItemAttrib attrib = items.get(id);
-                    if (attrib != null) return attrib;
-                    attrib = new ItemAttrib();
-                    items.put(id, attrib);
-                    return attrib;
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                    ItemAttrib attrib = new ItemAttrib();
-                    while (items.containsKey(NextID)) NextID++;
-                    items.put(NextID, attrib);
-                    lore.set(0, "" + ChatColor.RESET + ChatColor.AQUA + "attrib-id:" + NextID);
-                    meta.setLore(lore);
-                    stack.setItemMeta(meta);
-                    return attrib;
-                }
+                lore.set(0, AT_PREFIX + info.line0());
+                meta.setLore(lore);
+                stack.setItemMeta(meta);
+                return;
             }
         }
-        ItemAttrib attrib = new ItemAttrib();
-        while (items.containsKey(NextID)) NextID++;
-        items.put(NextID, attrib);
-        lore.add(0, "" + ChatColor.RESET + ChatColor.AQUA + "attrib-id:" + NextID);
+        lore.add(0, AT_PREFIX + info.line0());
         meta.setLore(lore);
         stack.setItemMeta(meta);
+    }
+
+    public static void setAttribId(ItemStack stack, ItemAttrib attrib) {
+        LoreInfo old = getInfo(stack);
+        LoreInfo info = new LoreInfo(old, attrib);
+        updateLore(stack, info);
+    }
+
+    public static ItemAttrib createAttrib(@Nonnull ItemStack stack) {
+        LoreInfo info = getInfo(stack);
+        if (info.attrib != null) return info.attrib;
+        while (items.containsKey(NextID)) NextID++;
+        ItemAttrib attrib = new ItemAttrib(NextID);
+        items.put(NextID, attrib);
+        setAttribId(stack, attrib);
         return attrib;
     }
 
+    @Nonnull
+    public static ItemAttrib createAttrib(String id) {
+        ItemAttrib attrib = getItemAttrib(id);
+        if (attrib != null) return attrib;
+        while (items.containsKey(NextID)) NextID++;
+        attrib = new ItemAttrib(NextID, id);
+        items.put(NextID, attrib);
+        names.put(attrib.name, attrib.id);
+        return attrib;
+    }
+
+    public static void setAttribName(ItemAttrib attrib, String name) {
+        names.remove(attrib.name);
+        names.put(name, attrib.id);
+        attrib.name = name;
+    }
+
     public void startTask(Player player) {
-        PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> new PlayerTickTask(AttribManager.this, player));
+        PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> new PlayerTickTask(player));
         try {
             task.runTaskTimer(plugin, 1, updateTicks);
         } catch (Throwable e) {
@@ -203,10 +200,4 @@ public class AttribManager extends SpigotManager {
         if (task != null) task.cancel();
         tasks.remove(player.getUniqueId());
     }
-
-    public ItemAttrib getPlayerAttrib(Player player) {
-        PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> new PlayerTickTask(AttribManager.this, player));
-        return task.getAttrib();
-    }
-
 }

@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.soraworld.attrib.data.ItemAttrib;
+import org.soraworld.attrib.data.LoreInfo;
 import org.soraworld.attrib.manager.AttribManager;
 import org.soraworld.violet.command.Paths;
 import org.soraworld.violet.command.SpigotCommand;
@@ -13,7 +14,7 @@ import org.soraworld.violet.command.Sub;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static org.soraworld.attrib.manager.AttribManager.updateLore;
+import static org.soraworld.attrib.manager.AttribManager.*;
 
 public final class CommandAttrib {
 
@@ -321,8 +322,52 @@ public final class CommandAttrib {
         Player player = (Player) sender;
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
-            updateLore(stack);
+            // TODO
+            updateLore(stack, getInfo(stack));
         } else manager.sendKey(player, "emptyHand");
+    }
+
+    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib setid <id|name>")
+    public static void setid(SpigotCommand self, CommandSender sender, Paths args) {
+        AttribManager manager = (AttribManager) self.manager;
+        Player player = (Player) sender;
+        if (args.notEmpty()) {
+            ItemStack stack = player.getItemInHand();
+            if (stack != null && stack.getType() != Material.AIR) {
+                LoreInfo info = getInfo(stack);
+                if (info.id >= 0) {
+                    ItemAttrib attrib = getItemAttrib(args.first());
+                    if (attrib != null) {
+                        updateLore(stack, new LoreInfo(info, attrib));
+                        player.setItemInHand(stack);
+                    } else manager.sendKey(player, "noItemId");
+                } else {
+                    ItemAttrib attrib = createAttrib(args.first());
+                    updateLore(stack, new LoreInfo(info, attrib));
+                    player.setItemInHand(stack);
+                }
+            } else manager.sendKey(player, "emptyHand");
+        } else manager.sendKey(player, "emptyArgs");
+    }
+
+    @Sub(perm = "admin", usage = "/attrib setname <id> <name>")
+    public static void setname(SpigotCommand self, CommandSender sender, Paths args) {
+        if (args.size() == 2) {
+            try {
+                int id = Integer.valueOf(args.get(0));
+                ItemAttrib attrib = getItemAttrib(id);
+                if (attrib != null) {
+                    ItemAttrib another = getItemAttrib(args.get(1));
+                    if (another != null && another != attrib) {
+                        self.manager.sendKey(sender, "nameAlreadyExist", another.name);
+                    } else {
+                        setAttribName(attrib, args.get(1));
+                    }
+                } else self.manager.sendKey(sender, "noItemId");
+            } catch (Throwable e) {
+                self.manager.sendKey(sender, "invalidInt");
+            }
+        } else self.manager.sendKey(sender, "invalidArgs");
     }
 
     private static void getSetInt(AttribManager manager, Player player, Paths args, String Name, int min, int max, BiConsumer<ItemAttrib, Integer> consumer, Function<ItemAttrib, Integer> function) {
@@ -332,7 +377,7 @@ public final class CommandAttrib {
                 try {
                     int value = Integer.valueOf(args.first());
                     value = value < min ? min : value > max ? max : value;
-                    ItemAttrib attrib = manager.createAttrib(stack);
+                    ItemAttrib attrib = createAttrib(stack);
                     player.setItemInHand(stack);
                     consumer.accept(attrib, value);
                     manager.sendKey(player, "set" + Name, value);
@@ -340,7 +385,7 @@ public final class CommandAttrib {
                     manager.sendKey(player, "invalidInt");
                 }
             } else {
-                ItemAttrib attrib = manager.getItemAttrib(stack);
+                ItemAttrib attrib = getItemAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
@@ -356,7 +401,7 @@ public final class CommandAttrib {
                     int value2 = Integer.valueOf(args.get(1));
                     value1 = value1 < min1 ? min1 : value1 > max1 ? max1 : value1;
                     value2 = value2 < min2 ? min2 : value2 > max2 ? max2 : value2;
-                    ItemAttrib attrib = manager.createAttrib(stack);
+                    ItemAttrib attrib = createAttrib(stack);
                     player.setItemInHand(stack);
                     cs1.accept(attrib, value1);
                     cs2.accept(attrib, value2);
@@ -365,7 +410,7 @@ public final class CommandAttrib {
                     manager.sendKey(player, "invalidInt");
                 }
             } else {
-                ItemAttrib attrib = manager.getItemAttrib(stack);
+                ItemAttrib attrib = getItemAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, fun1.apply(attrib), fun2.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
@@ -379,7 +424,7 @@ public final class CommandAttrib {
                 try {
                     float value = Float.valueOf(args.first());
                     value = value < min ? min : value > max ? max : value;
-                    ItemAttrib attrib = manager.createAttrib(stack);
+                    ItemAttrib attrib = createAttrib(stack);
                     player.setItemInHand(stack);
                     consumer.accept(attrib, value);
                     manager.sendKey(player, "set" + Name, value);
@@ -387,7 +432,7 @@ public final class CommandAttrib {
                     manager.sendKey(player, "invalidFloat");
                 }
             } else {
-                ItemAttrib attrib = manager.getItemAttrib(stack);
+                ItemAttrib attrib = getItemAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
@@ -399,12 +444,12 @@ public final class CommandAttrib {
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
                 boolean value = Boolean.valueOf(args.first());
-                ItemAttrib attrib = manager.createAttrib(stack);
+                ItemAttrib attrib = createAttrib(stack);
                 player.setItemInHand(stack);
                 consumer.accept(attrib, value);
                 manager.sendKey(player, "set" + Name, value);
             } else {
-                ItemAttrib attrib = manager.getItemAttrib(stack);
+                ItemAttrib attrib = getItemAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
@@ -416,16 +461,15 @@ public final class CommandAttrib {
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
                 String value = args.first();
-                ItemAttrib attrib = manager.createAttrib(stack);
+                ItemAttrib attrib = createAttrib(stack);
                 player.setItemInHand(stack);
                 consumer.accept(attrib, value);
                 manager.sendKey(player, "set" + Name, value);
             } else {
-                ItemAttrib attrib = manager.getItemAttrib(stack);
+                ItemAttrib attrib = getItemAttrib(stack);
                 if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
                 else manager.sendKey(player, "noAttrib");
             }
         } else manager.sendKey(player, "emptyHand");
     }
-
 }
