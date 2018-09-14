@@ -187,7 +187,7 @@ public class AttribManager extends SpigotManager {
     }
 
     public void startTask(Player player) {
-        PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> new PlayerTickTask(player));
+        PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> PlayerTickTask.createTask(player));
         try {
             task.runTaskTimer(plugin, 1, updateTicks);
         } catch (Throwable e) {

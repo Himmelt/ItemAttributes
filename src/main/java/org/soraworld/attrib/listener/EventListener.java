@@ -1,6 +1,5 @@
 package org.soraworld.attrib.listener;
 
-import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -20,6 +19,7 @@ import java.util.Random;
 
 import static org.soraworld.attrib.manager.AttribManager.getInfo;
 import static org.soraworld.attrib.manager.AttribManager.getItemAttrib;
+import static org.soraworld.attrib.task.PlayerTickTask.isHoldRight;
 
 public class EventListener implements Listener {
 
@@ -156,9 +156,5 @@ public class EventListener implements Listener {
             }
         }
         return pa;
-    }
-
-    private static boolean isHoldRight(Player player) {
-        return ((CraftPlayer) player).getHandle().by();
     }
 }
