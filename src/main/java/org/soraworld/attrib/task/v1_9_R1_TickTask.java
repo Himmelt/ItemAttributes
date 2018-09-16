@@ -14,9 +14,8 @@ public class v1_9_R1_TickTask extends PlayerTickTask {
     private AttributeInstance attackDamageInstance;
     private AttributeInstance knockResistInstance;
 
-    public v1_9_R1_TickTask(Player player) {
+    v1_9_R1_TickTask(Player player) {
         super(player);
-        // TODO 检查 respawn 和 切换世界 重新加入 EntityPlayer 是否改变
         EntityPlayer handle = ((CraftPlayer) player).getHandle();
         maxHealthInstance = handle.getAttributeInstance(GenericAttributes.maxHealth);
         moveSpeedInstance = handle.getAttributeInstance(GenericAttributes.MOVEMENT_SPEED);// movementSpeed

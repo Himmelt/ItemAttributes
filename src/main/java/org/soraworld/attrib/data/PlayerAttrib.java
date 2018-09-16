@@ -1,7 +1,7 @@
 package org.soraworld.attrib.data;
 
 public class PlayerAttrib {
-    public int armor;// 防御
+    public float armor;// 防御
     public float dodgeChance = 0;// 防御
     public float blockChance = 0, blockRation = 0;// 防御
     public float thornChance = 0, thornRatio = 0;// 防御

@@ -23,7 +23,7 @@ public class ItemAttrib {
     @Setting
     public float knock = 0;
     @Setting
-    public int armor = 0;
+    public float armor = 0;
     @Setting
     public float blockChance = 0, blockRatio = 0;
     @Setting

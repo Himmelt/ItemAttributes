@@ -28,6 +28,8 @@ public class AttribManager extends SpigotManager {
     private static HashMap<Integer, ItemAttrib> items = new HashMap<>();
     private static final LoreInfo BAD_INFO = new LoreInfo((String) null, null);
     private static final String AT_PREFIX = "" + ChatColor.RESET + ChatColor.AQUA;
+    private static final String PREFIX = "" + ChatColor.RESET;
+    private static final String VAR_0 = "{0}", VAR_1 = "{1}", VAR_2 = "{2}";
 
     @Setting
     private byte updateTicks = 10;
@@ -37,6 +39,8 @@ public class AttribManager extends SpigotManager {
     private boolean accumulateDodge = false;
     @Setting(comment = "comment.accumulateBlock")
     private boolean accumulateBlock = false;
+    @Setting(comment = "comment.defaultLore")
+    private HashMap<String, String> defaultLore = new LinkedHashMap<>();
 
     public AttribManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
@@ -69,8 +73,23 @@ public class AttribManager extends SpigotManager {
         return super.load();
     }
 
+    public void afterLoad() {
+        if (defaultLore.isEmpty()) {
+            defaultLore.put("health", "Boost {0} maxHealth");
+            defaultLore.put("regain", "Regain {0} health every cycle");
+            defaultLore.put("walkspeed", "Boost walkspeed {0}");
+            defaultLore.put("block", "{0}% chance block {1}% damage");
+        }
+    }
+
     public boolean save() {
         saveItems();
+        if (defaultLore.isEmpty()) {
+            defaultLore.put("health", "Boost {0} maxHealth");
+            defaultLore.put("regain", "Regain {0} health every cycle");
+            defaultLore.put("walkspeed", "Boost walkspeed {0}");
+            defaultLore.put("block", "{0}% chance block {1}% damage");
+        }
         return super.save();
     }
 
@@ -134,7 +153,7 @@ public class AttribManager extends SpigotManager {
         return BAD_INFO;
     }
 
-    public static void updateLore(ItemStack stack, LoreInfo info) {
+    public static void updateInfo(ItemStack stack, LoreInfo info) {
         ItemMeta meta = stack.getItemMeta();
         List<String> lore = meta.getLore();
         if (lore == null) lore = new ArrayList<>();
@@ -156,7 +175,7 @@ public class AttribManager extends SpigotManager {
     public static void setAttribId(ItemStack stack, ItemAttrib attrib) {
         LoreInfo old = getInfo(stack);
         LoreInfo info = new LoreInfo(old, attrib);
-        updateLore(stack, info);
+        updateInfo(stack, info);
     }
 
     public static ItemAttrib createAttrib(@Nonnull ItemStack stack) {
@@ -199,5 +218,54 @@ public class AttribManager extends SpigotManager {
         PlayerTickTask task = tasks.get(player.getUniqueId());
         if (task != null) task.cancel();
         tasks.remove(player.getUniqueId());
+    }
+
+    public List<String> getLore(LoreInfo info) {
+        ArrayList<String> lore = new ArrayList<>();
+        lore.add(AT_PREFIX + info.line0());
+        ItemAttrib at = info.attrib;
+        if (at != null) {
+            for (Map.Entry<String, String> entry : defaultLore.entrySet()) {
+                String key = entry.getKey();
+                String val = entry.getValue();
+                switch (key) {
+                    case "health":
+                        if (at.health > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.health)));
+                        break;
+                    case "regain":
+                        if (at.regain > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.regain)));
+                        break;
+                    case "walkspeed":
+                        if (at.walkspeed > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.walkspeed)));
+                        break;
+                    case "flyspeed":
+                        if (at.flyspeed > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.flyspeed)));
+                        break;
+                    case "attack":
+                        if (at.attack > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.attack)));
+                        break;
+                    case "knock":
+                        if (at.knock > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.knock)));
+                        break;
+                    case "armor":
+                        if (at.armor > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.armor)));
+                        break;
+                    case "block":
+                        if (at.blockChance > 0)
+                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.blockChance))
+                                    .replace(VAR_1, String.valueOf(at.blockRatio)));
+                        break;
+                    case "crit":
+                        if (at.critChance > 0)
+                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.critChance))
+                                    .replace(VAR_1, String.valueOf(at.critRatio)));
+                        break;
+                    default:
+                        lore.add(PREFIX + val);
+                        break;
+                }
+            }
+        }
+        return lore;
     }
 }

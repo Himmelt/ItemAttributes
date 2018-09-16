@@ -78,7 +78,8 @@ public class PlayerTickTask extends BukkitRunnable {
 
         player.setFlySpeed(flyspeed > 1.0F ? 1.0F : flyspeed);
         maxHealth = player.getMaxHealth();
-        player.setHealth(player.getHealth() + regain > maxHealth ? maxHealth : player.getHealth() + regain);
+        double health = player.getHealth() + regain;
+        player.setHealth(health < 0 ? 0 : health > maxHealth ? maxHealth : health);
     }
 
     public void updateModifier(double maxHealth, double moveSpeed, double attackDamage, double knockResist) {

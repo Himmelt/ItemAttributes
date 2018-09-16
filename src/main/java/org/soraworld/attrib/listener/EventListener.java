@@ -3,6 +3,7 @@ package org.soraworld.attrib.listener;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -74,7 +75,8 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageByEntityEvent event) {
-        Entity e1 = event.getDamager();
+        Object e1 = event.getDamager();
+        if (e1 instanceof Projectile) e1 = ((Projectile) e1).getShooter();
         Entity e2 = event.getEntity();
         if (e1 instanceof Damageable && e2 instanceof Damageable) {
             Damageable de1 = (Damageable) e1;
@@ -84,12 +86,12 @@ public class EventListener implements Listener {
             if (de1 instanceof Player) {
                 Player attacker = (Player) de1;
                 PlayerAttrib attrib = getPlayerAttrib(attacker);
-                if (de2.getHealth() < de2.getMaxHealth() * attrib.onekillRation && attrib.onekillChance > 0 && attrib.onekillChance > random.nextFloat()) {
-                    event.setDamage(de2.getHealth());
+                if (de2.getHealth() <= de2.getMaxHealth() * attrib.onekillRation && attrib.onekillChance > 0 && attrib.onekillChance > random.nextFloat()) {
+                    event.setDamage(de2.getHealth() + 1.0D);
                     return;
                 }
                 if (attrib.critChance > 0 && attrib.critChance > random.nextFloat()) damage += origin * attrib.critRation;
-                if (attacker.getHealth() < attacker.getMaxHealth() * attrib.rageHealth) damage += origin * attrib.rageRation;
+                if (attacker.getHealth() <= attacker.getMaxHealth() * attrib.rageHealth) damage += origin * attrib.rageRation;
                 if (attrib.suckChance > 0 && attrib.suckChance > random.nextFloat()) {
                     suck = damage * attrib.suckRation;
                 }
@@ -102,7 +104,7 @@ public class EventListener implements Listener {
                     event.setDamage(0);
                     return;
                 }
-                damage -= attrib.armor;
+                damage -= attackDamage * attrib.armor;
                 if (attrib.blockChance > 0 && attrib.blockChance > random.nextFloat() && isHoldRight(victim)) {
                     damage -= attackDamage * attrib.blockRation;
                 }
@@ -110,9 +112,9 @@ public class EventListener implements Listener {
                     thorn = attackDamage * attrib.thornRatio;
                 }
             }
-            event.setDamage(damage);
+            event.setDamage(damage < 0 ? 0 : damage);
             double health = de1.getHealth() - thorn + suck;
-            de1.setHealth(health < de1.getMaxHealth() ? health : de1.getMaxHealth());
+            de1.setHealth(health < 0 ? 0 : health < de1.getMaxHealth() ? health : de1.getMaxHealth());
         }
     }
 
@@ -133,6 +135,7 @@ public class EventListener implements Listener {
 
     private static PlayerAttrib getPlayerAttrib(Player player) {
         PlayerAttrib pa = new PlayerAttrib();
+        // TODO 1.9+
         LoreInfo info = getInfo(player.getItemInHand());
         if (info.attrib != null && info.canUse(player)) {
             pa.blockChance = info.attrib.blockChance;

@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.soraworld.attrib.data.ItemAttrib;
 import org.soraworld.attrib.data.LoreInfo;
 import org.soraworld.attrib.manager.AttribManager;
@@ -126,9 +127,9 @@ public final class CommandAttrib {
                 (AttribManager) self.manager,
                 (Player) sender,
                 args, "Armor",
-                0, Integer.MAX_VALUE,
-                (attrib, value) -> attrib.armor = value,
-                attrib -> attrib.armor
+                0, 100,
+                (attrib, value) -> attrib.armor = value / 100.0F,
+                attrib -> (int) (attrib.armor * 100)
         );
     }
 
@@ -322,8 +323,10 @@ public final class CommandAttrib {
         Player player = (Player) sender;
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
-            // TODO
-            updateLore(stack, getInfo(stack));
+            ItemMeta meta = stack.getItemMeta();
+            meta.setLore(manager.getLore(getInfo(stack)));
+            stack.setItemMeta(meta);
+            player.setItemInHand(stack);
         } else manager.sendKey(player, "emptyHand");
     }
 
@@ -338,12 +341,12 @@ public final class CommandAttrib {
                 if (info.id >= 0) {
                     ItemAttrib attrib = getItemAttrib(args.first());
                     if (attrib != null) {
-                        updateLore(stack, new LoreInfo(info, attrib));
+                        updateInfo(stack, new LoreInfo(info, attrib));
                         player.setItemInHand(stack);
                     } else manager.sendKey(player, "noItemId");
                 } else {
                     ItemAttrib attrib = createAttrib(args.first());
-                    updateLore(stack, new LoreInfo(info, attrib));
+                    updateInfo(stack, new LoreInfo(info, attrib));
                     player.setItemInHand(stack);
                 }
             } else manager.sendKey(player, "emptyHand");
