@@ -70,7 +70,7 @@ public class PlayerTickTask extends BukkitRunnable {
                 knockResist += attrib.knock;
                 regain += attrib.regain;
                 flyspeed += attrib.flyspeed;
-                // TODO potions
+                attrib.applyPotions(player);
             }
         }
 

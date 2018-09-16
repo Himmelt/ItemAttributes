@@ -296,15 +296,14 @@ public final class CommandAttrib {
      * 穿戴时给予自身药水效果
      * 建议位置：护甲
      */
-    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib potions [id]")
+    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib potions [id] [lvl]")
     public static void potions(SpigotCommand self, CommandSender sender, Paths args) {
-
     }
 
     /**
      * 左键魔咒(予以攻击对象)
      */
-    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib spells")
+    @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib spells [id] [lvl] [time]")
     public static void spells(SpigotCommand self, CommandSender sender, Paths args) {
 
     }

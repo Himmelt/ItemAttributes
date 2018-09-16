@@ -5,6 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.soraworld.attrib.data.ItemAttrib;
 import org.soraworld.attrib.data.LoreInfo;
+import org.soraworld.attrib.data.Potion;
 import org.soraworld.attrib.task.PlayerTickTask;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Setting;
@@ -44,6 +45,7 @@ public class AttribManager extends SpigotManager {
 
     public AttribManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
+        options.registerType(new Potion());
         itemsFile = path.resolve("items.conf");
     }
 
@@ -245,20 +247,71 @@ public class AttribManager extends SpigotManager {
                         if (at.attack > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.attack)));
                         break;
                     case "knock":
-                        if (at.knock > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.knock)));
+                        if (at.knock > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.knock * 100))));
                         break;
                     case "armor":
-                        if (at.armor > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.armor)));
+                        if (at.armor > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.armor * 100))));
                         break;
                     case "block":
                         if (at.blockChance > 0)
-                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.blockChance))
-                                    .replace(VAR_1, String.valueOf(at.blockRatio)));
+                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.blockChance * 100)))
+                                    .replace(VAR_1, String.valueOf((int) (at.blockRatio * 100))));
                         break;
                     case "crit":
                         if (at.critChance > 0)
-                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.critChance))
-                                    .replace(VAR_1, String.valueOf(at.critRatio)));
+                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.critChance * 100)))
+                                    .replace(VAR_1, String.valueOf((int) (at.critRatio * 100))));
+                        break;
+                    case "suck":
+                        if (at.suckChance > 0)
+                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.suckChance * 100)))
+                                    .replace(VAR_1, String.valueOf((int) (at.suckRatio * 100))));
+                        break;
+                    case "onekill":
+                        if (at.onekillChance > 0)
+                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.onekillChance * 100)))
+                                    .replace(VAR_1, String.valueOf((int) (at.onekillRatio * 100))));
+                        break;
+                    case "thorn":
+                        if (at.thornChance > 0)
+                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.thornChance * 100)))
+                                    .replace(VAR_1, String.valueOf((int) (at.thornRatio * 100))));
+                        break;
+                    case "rage":
+                        if (at.rageHealth > 0)
+                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.rageHealth * 100)))
+                                    .replace(VAR_1, String.valueOf((int) (at.rageRatio * 100))));
+                        break;
+                    case "dodge":
+                        if (at.dodgeChance > 0)
+                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.dodgeChance * 100))));
+                        break;
+                    case "immortal":
+                        if (at.immortalChance > 0)
+                            lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.immortalChance * 100))));
+                        break;
+                    case "potions":
+                        if (at.potions != null && at.potions.size() > 0) {
+                            for (Potion potion : at.potions) {
+                                lore.add(PREFIX + val.replace(VAR_0, trans(potion.getName()))
+                                        .replace(VAR_1, trans(potion.getLvl())));
+                            }
+                        }
+                        break;
+                    case "spells":
+                        if (at.spells != null && at.spells.size() > 0) {
+                            for (Potion spell : at.spells) {
+                                lore.add(PREFIX + val.replace(VAR_0, trans(spell.getName()))
+                                        .replace(VAR_1, trans(spell.getLvl())));
+                            }
+                        }
+                        break;
+                    case "skills":
+                        if (at.skills != null && at.skills.size() > 0) {
+                            for (String skill : at.skills) {
+                                // TODO
+                            }
+                        }
                         break;
                     default:
                         lore.add(PREFIX + val);

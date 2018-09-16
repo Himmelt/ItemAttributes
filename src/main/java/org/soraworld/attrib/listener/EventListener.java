@@ -1,9 +1,6 @@
 package org.soraworld.attrib.listener;
 
-import org.bukkit.entity.Damageable;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -95,6 +92,7 @@ public class EventListener implements Listener {
                 if (attrib.suckChance > 0 && attrib.suckChance > random.nextFloat()) {
                     suck = damage * attrib.suckRation;
                 }
+                if (de2 instanceof LivingEntity) attrib.applySpells((LivingEntity) de2);
             }
             attackDamage = damage;
             if (e2 instanceof Player) {
@@ -148,6 +146,7 @@ public class EventListener implements Listener {
             pa.suckRation = info.attrib.suckRatio;
             pa.rageHealth = info.attrib.rageHealth;
             pa.rageRation = info.attrib.rageRatio;
+            pa.spells = info.attrib.spells;
         }
         for (ItemStack stack : player.getInventory().getArmorContents()) {
             info = getInfo(stack);

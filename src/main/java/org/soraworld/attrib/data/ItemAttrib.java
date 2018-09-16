@@ -1,9 +1,10 @@
 package org.soraworld.attrib.data;
 
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.potion.PotionEffect;
 import org.soraworld.hocon.node.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 
 public class ItemAttrib {
 
@@ -35,9 +36,9 @@ public class ItemAttrib {
     @Setting
     public float thornChance = 0, thornRatio = 0;
     @Setting
-    public float immortalChance = 0;
-    @Setting
     public float rageHealth = 0, rageRatio = 0;
+    @Setting
+    public float immortalChance = 0;
     @Setting
     public float dodgeChance = 0;
     @Setting
@@ -45,11 +46,11 @@ public class ItemAttrib {
     @Setting
     public String perm = null;
     @Setting
-    public List<Integer> potions = new ArrayList<>();
+    public HashSet<Potion> potions = new HashSet<>();
     @Setting
-    public List<Integer> spells = new ArrayList<>();
+    public HashSet<Potion> spells = new HashSet<>();
     @Setting
-    public List<String> skills = new ArrayList<>();
+    public HashSet<String> skills = new HashSet<>();
 
     public ItemAttrib(int id) {
         this.id = id;
@@ -97,20 +98,27 @@ public class ItemAttrib {
             if (attrib.perm != null && !attrib.perm.isEmpty()) node.set("perm", attrib.perm);
             if (attrib.potions != null && !attrib.potions.isEmpty()) {
                 NodeList list = new NodeList(options);
-                for (Integer i : attrib.potions) list.add(new NodeBase(options, i, false));
+                for (Potion potion : attrib.potions) list.add(new NodeBase(options, potion, false));
                 node.set("potions", list);
             }
             if (attrib.spells != null && !attrib.spells.isEmpty()) {
                 NodeList list = new NodeList(options);
-                for (Integer i : attrib.spells) list.add(new NodeBase(options, i, false));
+                for (Potion spell : attrib.spells) list.add(new NodeBase(options, spell, false));
                 node.set("spells", list);
             }
             if (attrib.skills != null && !attrib.skills.isEmpty()) {
                 NodeList list = new NodeList(options);
-                for (String s : attrib.skills) list.add(new NodeBase(options, s, false));
+                for (String skill : attrib.skills) list.add(new NodeBase(options, skill, false));
                 node.set("skills", list);
             }
         }
         return node;
+    }
+
+    public void applyPotions(LivingEntity entity) {
+        for (Potion potion : potions) {
+            PotionEffect effect = potion.getEffect();
+            if (effect != null) entity.addPotionEffect(effect, true);
+        }
     }
 }
