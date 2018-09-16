@@ -32,7 +32,7 @@ public class AttribManager extends SpigotManager {
     private static final String PREFIX = "" + ChatColor.RESET;
     private static final String VAR_0 = "{0}", VAR_1 = "{1}", VAR_2 = "{2}";
 
-    @Setting
+    @Setting(comment = "comment.updateTicks")
     private byte updateTicks = 10;
     @Setting(comment = "comment.autoUpdate")
     private boolean autoUpdate = false;
@@ -76,22 +76,36 @@ public class AttribManager extends SpigotManager {
     }
 
     public void afterLoad() {
+        setDefaultLore();
+    }
+
+    private void setDefaultLore() {
         if (defaultLore.isEmpty()) {
-            defaultLore.put("health", "Boost {0} maxHealth");
-            defaultLore.put("regain", "Regain {0} health every cycle");
-            defaultLore.put("walkspeed", "Boost walkspeed {0}");
-            defaultLore.put("block", "{0}% chance block {1}% damage");
+            defaultLore.put("health", trans("defLore.health"));
+            defaultLore.put("regain", trans("defLore.regain"));
+            defaultLore.put("walkspeed", trans("defLore.walkspeed"));
+            defaultLore.put("flyspeed", trans("defLore.flyspeed"));
+            defaultLore.put("block", trans("defLore.block"));
+            defaultLore.put("attack", trans("defLore.attack"));
+            defaultLore.put("knock", trans("defLore.knock"));
+            defaultLore.put("armor", trans("defLore.armor"));
+            defaultLore.put("crit", trans("defLore.crit"));
+            defaultLore.put("suck", trans("defLore.suck"));
+            defaultLore.put("onekill", trans("defLore.onekill"));
+            defaultLore.put("thorn", trans("defLore.thorn"));
+            defaultLore.put("rage", trans("defLore.rage"));
+            defaultLore.put("immortal", trans("defLore.immortal"));
+            defaultLore.put("dodge", trans("defLore.dodge"));
+            defaultLore.put("perm", trans("defLore.perm"));
+            defaultLore.put("potion", trans("defLore.potion"));
+            defaultLore.put("spell", trans("defLore.spell"));
+            defaultLore.put("skill", trans("defLore.skill"));
         }
     }
 
     public boolean save() {
         saveItems();
-        if (defaultLore.isEmpty()) {
-            defaultLore.put("health", "Boost {0} maxHealth");
-            defaultLore.put("regain", "Regain {0} health every cycle");
-            defaultLore.put("walkspeed", "Boost walkspeed {0}");
-            defaultLore.put("block", "{0}% chance block {1}% damage");
-        }
+        setDefaultLore();
         return super.save();
     }
 
@@ -235,7 +249,8 @@ public class AttribManager extends SpigotManager {
                         if (at.health > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.health)));
                         break;
                     case "regain":
-                        if (at.regain > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.regain)));
+                        if (at.regain > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(updateTicks))
+                                .replace(VAR_1, String.valueOf(at.regain)));
                         break;
                     case "walkspeed":
                         if (at.walkspeed > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.walkspeed)));
@@ -290,7 +305,10 @@ public class AttribManager extends SpigotManager {
                         if (at.immortalChance > 0)
                             lore.add(PREFIX + val.replace(VAR_0, String.valueOf((int) (at.immortalChance * 100))));
                         break;
-                    case "potions":
+                    case "perm":
+                        if (at.perm != null && !at.perm.isEmpty()) lore.add(PREFIX + val.replace(VAR_0, at.perm));
+                        break;
+                    case "potion":
                         if (at.potions != null && at.potions.size() > 0) {
                             for (Potion potion : at.potions) {
                                 lore.add(PREFIX + val.replace(VAR_0, trans(potion.getName()))
@@ -298,15 +316,16 @@ public class AttribManager extends SpigotManager {
                             }
                         }
                         break;
-                    case "spells":
+                    case "spell":
                         if (at.spells != null && at.spells.size() > 0) {
                             for (Potion spell : at.spells) {
                                 lore.add(PREFIX + val.replace(VAR_0, trans(spell.getName()))
-                                        .replace(VAR_1, trans(spell.getLvl())));
+                                        .replace(VAR_1, trans(spell.getLvl()))
+                                        .replace(VAR_2, spell.getDuration()));
                             }
                         }
                         break;
-                    case "skills":
+                    case "skill":
                         if (at.skills != null && at.skills.size() > 0) {
                             for (String skill : at.skills) {
                                 // TODO

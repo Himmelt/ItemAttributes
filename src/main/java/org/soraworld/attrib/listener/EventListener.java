@@ -91,6 +91,7 @@ public class EventListener implements Listener {
                 if (attacker.getHealth() <= attacker.getMaxHealth() * attrib.rageHealth) damage += origin * attrib.rageRation;
                 if (attrib.suckChance > 0 && attrib.suckChance > random.nextFloat()) {
                     suck = damage * attrib.suckRation;
+                    damage += suck;
                 }
                 if (de2 instanceof LivingEntity) attrib.applySpells((LivingEntity) de2);
             }

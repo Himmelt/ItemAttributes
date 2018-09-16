@@ -75,4 +75,8 @@ public class Potion implements TypeSerializer<Potion> {
     public String getLvl() {
         return "potionLvl." + lvl;
     }
+
+    public String getDuration() {
+        return String.valueOf(duration / 20.0);
+    }
 }

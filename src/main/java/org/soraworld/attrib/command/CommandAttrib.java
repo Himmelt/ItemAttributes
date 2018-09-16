@@ -286,7 +286,7 @@ public final class CommandAttrib {
         getSetString(
                 (AttribManager) self.manager,
                 (Player) sender,
-                args, "Bind",
+                args, "Perm",
                 (attrib, value) -> attrib.perm = value,
                 attrib -> attrib.perm
         );

@@ -4,4 +4,53 @@
 chatHead = "[阿翠碧丝] "
 
 comment {
+  updateTicks = "玩家状态更新间隔(建议不要超过2s 即40ticks)"
+  autoUpdate = "在编辑物品时自动更新Lore"
+  defaultLore = "默认物品描述内容"
+}
+# 默认描述
+defLore {
+  health = "穿戴时: 提升 {0} 最大生命值"
+  regain = "穿戴时: 每 {0} tick 恢复 {1} 生命"
+  walkspeed = "穿戴时: 提升 {0} 步行速度"
+  flyspeed = "穿戴时: 提升 {0} 飞行速度"
+  block = "右键时: {0}% 几率格挡 {1}% 伤害"
+  attack = "手持时: 提升 {0} 攻击力"
+  knock = "穿戴时: {0}% 几率免疫击退"
+  armor = "穿戴时: 防御 {0}% 伤害"
+  crit = "攻击时: {0}% 几率造成 {1}% 暴击伤害"
+  suck = "攻击时: {0}% 几率吸取对方 {1}%伤害值的生命到自身"
+  onekill = "攻击时: {0}% 几率在对方生命值小于 {1}% 时 发动 [一击必杀]"
+  thorn = "穿戴时: {0}% 几率给对方造成 {1}% 攻击值的反伤"
+  rage = "攻击时: 当自身生命小于 {0}% 时，提升 {1}% 攻击力"
+  immortal = "使用时: {0}% 几率不消耗耐久"
+  dodge = "穿戴时: {0}% 几率闪避攻击"
+  perm = "使用时: 使用权限 <{0}>"
+  potion = "穿戴时: 给与自身 {0}{1} 效果"
+  spell = "攻击时: 给对方施加 {2}s {0}{1} 效果"
+  skill = "右键时: 释放技能 - {0}"
+}
+# 药水效果id
+potionName {
+  speed = "速度"
+  slow = "缓慢"
+  fast_digging = "急迫"
+  slow_digging = "挖掘疲劳"
+  heal = "生命恢复"
+  harm = "瞬间伤害"
+  jump = "跳跃提升"
+  poison = "中毒"
+}
+# 药水效果等级
+potionLvl {
+  1 = I
+  2 = II
+  3 = III
+  4 = IV
+  5 = V
+  6 = VI
+  7 = VII
+  8 = VII
+  9 = IX
+  10 = X
 }
