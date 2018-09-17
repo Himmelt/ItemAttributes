@@ -12,6 +12,8 @@ public class ItemAttrib {
     @Setting
     public String name;
     @Setting
+    public int suit = -1;
+    @Setting
     public int health = 0;
     @Setting
     public float regain = 0;
@@ -73,6 +75,7 @@ public class ItemAttrib {
         NodeMap node = new NodeMap(options);
         if (attrib != null) {
             if (attrib.name != null && !attrib.name.isEmpty()) node.set("name", attrib.name);
+            if (attrib.suit >= 0) node.set("suit", attrib.suit);
             if (attrib.health != 0) node.set("health", attrib.health);
             if (attrib.regain != 0) node.set("regain", attrib.regain);
             if (attrib.walkspeed != 0) node.set("walkspeed", attrib.walkspeed);
