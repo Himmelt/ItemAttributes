@@ -1,6 +1,6 @@
 package org.soraworld.attrib.data;
 
-import org.bukkit.entity.Player;
+import org.bukkit.entity.HumanEntity;
 
 import javax.annotation.Nonnull;
 
@@ -24,7 +24,7 @@ public class LoreInfo {
         this.id = attrib == null ? -1 : attrib.id;
     }
 
-    public boolean canUse(Player player) {
+    public boolean canUse(HumanEntity player) {
         if (attrib != null) {
             if (attrib.perm != null && !attrib.perm.isEmpty()) {
                 if (!player.hasPermission(attrib.perm)) return false;
@@ -32,9 +32,8 @@ public class LoreInfo {
             if (attrib.bindEnable && owner != null && !owner.isEmpty()) {
                 return owner.equals(player.getName());
             }
-            return true;
         }
-        return false;
+        return true;
     }
 
     public String line0() {

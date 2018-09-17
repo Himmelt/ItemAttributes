@@ -6,7 +6,7 @@ import org.bukkit.potion.PotionEffect;
 import java.util.HashSet;
 
 public class PlayerAttrib {
-    public float armor;// 防御
+    public float armor = 0;// 防御
     public float dodgeChance = 0;// 防御
     public float blockChance = 0, blockRation = 0;// 防御
     public float thornChance = 0, thornRatio = 0;// 防御

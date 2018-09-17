@@ -3,11 +3,11 @@ package org.soraworld.attrib.task;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.soraworld.attrib.data.ItemAttrib;
+import org.soraworld.attrib.data.LoreInfo;
 
 import java.util.UUID;
 
-import static org.soraworld.attrib.manager.AttribManager.getItemAttrib;
+import static org.soraworld.attrib.manager.AttribManager.getInfo;
 import static org.soraworld.violet.nms.Version.*;
 
 public class PlayerTickTask extends BukkitRunnable {
@@ -53,24 +53,23 @@ public class PlayerTickTask extends BukkitRunnable {
     }
 
     public void run() {
-        ItemAttrib attrib;
         float regain = 0.0F, flyspeed = 0.1F;
         double maxHealth = 0.0D, moveSpeed = 0.0D, attackDamage = 0.0D, knockResist = 0.0D;
 
         // Check ItemInHand
-        attrib = getItemAttrib(player.getItemInHand());
-        if (attrib != null) attackDamage += attrib.attack;
+        LoreInfo info = getInfo(player.getItemInHand());
+        if (info.attrib != null && info.canUse(player)) attackDamage += info.attrib.attack;
 
         // Check Armors
         for (ItemStack stack : player.getInventory().getArmorContents()) {
-            attrib = getItemAttrib(stack);
-            if (attrib != null) {
-                maxHealth += attrib.health;
-                moveSpeed += attrib.walkspeed;
-                knockResist += attrib.knock;
-                regain += attrib.regain;
-                flyspeed += attrib.flyspeed;
-                attrib.applyPotions(player);
+            info = getInfo(stack);
+            if (info.attrib != null && info.canUse(player)) {
+                maxHealth += info.attrib.health;
+                moveSpeed += info.attrib.walkspeed;
+                knockResist += info.attrib.knock;
+                regain += info.attrib.regain;
+                flyspeed += info.attrib.flyspeed;
+                info.attrib.applyPotions(player);
             }
         }
 

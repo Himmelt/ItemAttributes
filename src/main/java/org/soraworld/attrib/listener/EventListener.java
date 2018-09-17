@@ -4,6 +4,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -34,30 +35,30 @@ public class EventListener implements Listener {
         if (event.hasItem()) {
             Player player = event.getPlayer();
             LoreInfo info = getInfo(event.getItem());
-            if (info.attrib != null) {
-                if (info.attrib.perm != null && !info.attrib.perm.isEmpty()) {
-                    if (!player.hasPermission(info.attrib.perm)) {
-                        event.setCancelled(true);
-                        manager.sendKey(player, "noItemPerm", info.attrib.perm);
-                    }
+            if (info.canUse(player)) {
+                if (info.attrib != null && info.attrib.bindEnable && (info.owner == null || info.owner.isEmpty())) {
+                    ItemStack stack = event.getItem();
+                    ItemMeta meta = stack.getItemMeta();
+                    List<String> lore = meta.getLore();
+                    lore.set(0, lore.get(0) + " bind:" + player.getName());
+                    meta.setLore(lore);
+                    stack.setItemMeta(meta);
+                    manager.sendKey(player, "itemBind");
                 }
-                if (info.attrib.bindEnable) {
-                    if (info.owner != null && !info.owner.isEmpty()) {
-                        if (!info.owner.equals(player.getName())) {
-                            event.setCancelled(true);
-                            manager.sendKey(player, "notItemOwner");
-                        }
-                    } else {
-                        ItemStack stack = event.getItem();
-                        ItemMeta meta = stack.getItemMeta();
-                        List<String> lore = meta.getLore();
-                        lore.set(0, lore.get(0) + " bind:" + player.getName());
-                        meta.setLore(lore);
-                        stack.setItemMeta(meta);
-                        manager.sendKey(player, "itemBind");
-                    }
-                }
+            } else {
+                event.setCancelled(true);
+                manager.sendKey(player, "cantUseItem");
             }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        LoreInfo info = getInfo(event.getCurrentItem());
+        HumanEntity human = event.getWhoClicked();
+        if (!info.canUse(human)) {
+            event.setCancelled(true);
+            manager.sendKey(human, "cantUseItem");
         }
     }
 
@@ -67,6 +68,15 @@ public class EventListener implements Listener {
         if (attrib != null && attrib.immortalChance > 0 && random.nextFloat() < attrib.immortalChance) {
             event.setDamage(0);
             event.getPlayer().updateInventory();
+        }
+    }
+
+    @EventHandler
+    public void on(PlayerAnimationEvent event) {
+        Player player = event.getPlayer();
+        if (!getInfo(player.getItemInHand()).canUse(player)) {
+            event.setCancelled(true);
+            manager.sendKey(player, "cantUseItem");
         }
     }
 

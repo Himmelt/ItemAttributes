@@ -469,7 +469,7 @@ public final class CommandAttrib {
                 manager.sendKey(player, "set" + Name, value);
             } else {
                 ItemAttrib attrib = getItemAttrib(stack);
-                if (attrib != null) manager.sendKey(player, "get" + Name, function.apply(attrib));
+                if (attrib != null) manager.sendKey(player, "get" + Name, String.valueOf(function.apply(attrib)));
                 else manager.sendKey(player, "noAttrib");
             }
         } else manager.sendKey(player, "emptyHand");
