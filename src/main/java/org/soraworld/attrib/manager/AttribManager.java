@@ -249,7 +249,7 @@ public class AttribManager extends SpigotManager {
                         if (at.health > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(at.health)));
                         break;
                     case "regain":
-                        if (at.regain > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(updateTicks))
+                        if (at.regain > 0) lore.add(PREFIX + val.replace(VAR_0, String.valueOf(updateTicks / 20.0F))
                                 .replace(VAR_1, String.valueOf(at.regain)));
                         break;
                     case "walkspeed":
