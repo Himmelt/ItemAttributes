@@ -11,12 +11,14 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 
 public class Potion implements TypeSerializer<Potion> {
-    private String name;
-    private int lvl;
-    private int duration = 80;
+    private final String name;
+    private final int lvl;
+    private final int duration;
 
     public Potion() {
         name = "";
+        lvl = 0;
+        duration = 80;
     }
 
     public int hashCode() {
@@ -32,7 +34,7 @@ public class Potion implements TypeSerializer<Potion> {
 
     public Potion(String name, int lvl, int duration) {
         this.name = name;
-        this.lvl = lvl;
+        this.lvl = lvl < 0 ? 0 : lvl;
         this.duration = duration;
     }
 
