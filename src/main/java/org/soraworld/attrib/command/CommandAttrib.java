@@ -8,7 +8,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.soraworld.attrib.data.ItemAttrib;
 import org.soraworld.attrib.data.LoreInfo;
 import org.soraworld.attrib.manager.AttribManager;
-import org.soraworld.violet.command.Paths;
+import org.soraworld.violet.command.Args;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.command.Sub;
 
@@ -25,7 +25,7 @@ public final class CommandAttrib {
      * 建议使用位置：护甲
      */
     @Sub(perm = "admin", onlyPlayer = true, aliases = {"hp"}, usage = "/attrib health|hp [health]")
-    public static void health(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void health(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -42,7 +42,7 @@ public final class CommandAttrib {
      * 建议使用位置：护甲
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib regain [value]")
-    public static void regain(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void regain(SpigotCommand self, CommandSender sender, Args args) {
         getSetFloat(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -58,7 +58,7 @@ public final class CommandAttrib {
      * 建议使用位置：全部
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib walkspeed [speed]")
-    public static void walkspeed(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void walkspeed(SpigotCommand self, CommandSender sender, Args args) {
         getSetFloat(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -74,7 +74,7 @@ public final class CommandAttrib {
      * 建议使用位置：全部
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib flyspeed [speed]")
-    public static void flyspeed(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void flyspeed(SpigotCommand self, CommandSender sender, Args args) {
         getSetFloat(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -90,7 +90,7 @@ public final class CommandAttrib {
      * 建议使用位置：武器
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib attack [damage]")
-    public static void attack(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void attack(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -106,7 +106,7 @@ public final class CommandAttrib {
      * 建议使用位置：护甲
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib knock [knock]")
-    public static void knock(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void knock(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -122,7 +122,7 @@ public final class CommandAttrib {
      * 建议使用位置：护甲
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib armor [armor]")
-    public static void armor(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void armor(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -138,7 +138,7 @@ public final class CommandAttrib {
      * 建议使用位置：护甲
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib block [chance%] [ratio%]")
-    public static void block(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void block(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt2(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -157,7 +157,7 @@ public final class CommandAttrib {
      * 建议位置：全部
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib dodge [chance%]")
-    public static void dodge(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void dodge(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -173,7 +173,7 @@ public final class CommandAttrib {
      * 建议位置：武器
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib crit [chance%] [ratio%]")
-    public static void crit(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void crit(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt2(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -191,7 +191,7 @@ public final class CommandAttrib {
      * 建议位置：武器
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib suck [chance%] [ratio%]")
-    public static void suck(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void suck(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt2(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -209,7 +209,7 @@ public final class CommandAttrib {
      * 当攻击对象血量低于 ratio% 时，有 chance% 一击击杀.
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib onekill [chance%] [ratio%]")
-    public static void onekill(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void onekill(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt2(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -227,7 +227,7 @@ public final class CommandAttrib {
      * 建议位置：护甲
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib thorn [chance%] [ratio%]")
-    public static void thorn(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void thorn(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt2(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -241,7 +241,7 @@ public final class CommandAttrib {
     }
 
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib immortal [chance%]")
-    public static void immortal(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void immortal(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -257,7 +257,7 @@ public final class CommandAttrib {
      * 当血量低于百分比时，攻击力提升百分比.
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib rage [health%] [ratio%]")
-    public static void rage(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void rage(SpigotCommand self, CommandSender sender, Args args) {
         getSetInt2(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -271,7 +271,7 @@ public final class CommandAttrib {
     }
 
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib bind [enable]")
-    public static void bind(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void bind(SpigotCommand self, CommandSender sender, Args args) {
         getSetBool(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -282,7 +282,7 @@ public final class CommandAttrib {
     }
 
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib perm [perm]")
-    public static void perm(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void perm(SpigotCommand self, CommandSender sender, Args args) {
         getSetString(
                 (AttribManager) self.manager,
                 (Player) sender,
@@ -297,14 +297,14 @@ public final class CommandAttrib {
      * 建议位置：护甲
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib potions [id] [lvl]")
-    public static void potions(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void potions(SpigotCommand self, CommandSender sender, Args args) {
     }
 
     /**
      * 左键魔咒(予以攻击对象)
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib spells [id] [lvl] [time]")
-    public static void spells(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void spells(SpigotCommand self, CommandSender sender, Args args) {
 
     }
 
@@ -312,12 +312,12 @@ public final class CommandAttrib {
      * 右键技能
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib skills")
-    public static void skills(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void skills(SpigotCommand self, CommandSender sender, Args args) {
         // TODO 消耗生命值提升攻击力/防御
     }
 
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib update")
-    public static void update(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void update(SpigotCommand self, CommandSender sender, Args args) {
         AttribManager manager = (AttribManager) self.manager;
         Player player = (Player) sender;
         ItemStack stack = player.getItemInHand();
@@ -330,7 +330,7 @@ public final class CommandAttrib {
     }
 
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib setid <id|name>")
-    public static void setid(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void setid(SpigotCommand self, CommandSender sender, Args args) {
         AttribManager manager = (AttribManager) self.manager;
         Player player = (Player) sender;
         if (args.notEmpty()) {
@@ -353,7 +353,7 @@ public final class CommandAttrib {
     }
 
     @Sub(perm = "admin", usage = "/attrib setname <id> <name>")
-    public static void setname(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void setname(SpigotCommand self, CommandSender sender, Args args) {
         if (args.size() == 2) {
             try {
                 int id = Integer.valueOf(args.get(0));
@@ -372,7 +372,7 @@ public final class CommandAttrib {
         } else self.manager.sendKey(sender, "invalidArgs");
     }
 
-    private static void getSetInt(AttribManager manager, Player player, Paths args, String Name, int min, int max, BiConsumer<ItemAttrib, Integer> consumer, Function<ItemAttrib, Integer> function) {
+    private static void getSetInt(AttribManager manager, Player player, Args args, String Name, int min, int max, BiConsumer<ItemAttrib, Integer> consumer, Function<ItemAttrib, Integer> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
@@ -394,7 +394,7 @@ public final class CommandAttrib {
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetInt2(AttribManager manager, Player player, Paths args, String Name, int min1, int max1, int min2, int max2, BiConsumer<ItemAttrib, Integer> cs1, BiConsumer<ItemAttrib, Integer> cs2, Function<ItemAttrib, Integer> fun1, Function<ItemAttrib, Integer> fun2) {
+    private static void getSetInt2(AttribManager manager, Player player, Args args, String Name, int min1, int max1, int min2, int max2, BiConsumer<ItemAttrib, Integer> cs1, BiConsumer<ItemAttrib, Integer> cs2, Function<ItemAttrib, Integer> fun1, Function<ItemAttrib, Integer> fun2) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
@@ -419,7 +419,7 @@ public final class CommandAttrib {
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetFloat(AttribManager manager, Player player, Paths args, String Name, float min, float max, BiConsumer<ItemAttrib, Float> consumer, Function<ItemAttrib, Float> function) {
+    private static void getSetFloat(AttribManager manager, Player player, Args args, String Name, float min, float max, BiConsumer<ItemAttrib, Float> consumer, Function<ItemAttrib, Float> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
@@ -441,7 +441,7 @@ public final class CommandAttrib {
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetBool(AttribManager manager, Player player, Paths args, String Name, BiConsumer<ItemAttrib, Boolean> consumer, Function<ItemAttrib, Boolean> function) {
+    private static void getSetBool(AttribManager manager, Player player, Args args, String Name, BiConsumer<ItemAttrib, Boolean> consumer, Function<ItemAttrib, Boolean> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
@@ -458,7 +458,7 @@ public final class CommandAttrib {
         } else manager.sendKey(player, "emptyHand");
     }
 
-    private static void getSetString(AttribManager manager, Player player, Paths args, String Name, BiConsumer<ItemAttrib, String> consumer, Function<ItemAttrib, String> function) {
+    private static void getSetString(AttribManager manager, Player player, Args args, String Name, BiConsumer<ItemAttrib, String> consumer, Function<ItemAttrib, String> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {

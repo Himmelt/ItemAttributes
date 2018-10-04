@@ -2,8 +2,6 @@ package org.soraworld.attrib.data;
 
 import org.bukkit.entity.HumanEntity;
 
-import javax.annotation.Nonnull;
-
 public class LoreInfo {
     public final int id;
     public final String owner;
@@ -17,7 +15,7 @@ public class LoreInfo {
         this.id = attrib == null ? -1 : attrib.id;
     }
 
-    public LoreInfo(@Nonnull LoreInfo info, ItemAttrib attrib) {
+    public LoreInfo(LoreInfo info, ItemAttrib attrib) {
         this.owner = info.owner;
         this.inlay = info.inlay;
         this.attrib = attrib;

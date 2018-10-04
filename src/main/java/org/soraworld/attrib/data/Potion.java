@@ -7,7 +7,6 @@ import org.soraworld.hocon.node.NodeBase;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.serializer.TypeSerializer;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 
 public class Potion implements TypeSerializer<Potion> {
@@ -44,7 +43,7 @@ public class Potion implements TypeSerializer<Potion> {
         else return null;
     }
 
-    public Potion deserialize(@Nonnull Type type, @Nonnull Node node) {
+    public Potion deserialize(Type type, Node node) {
         if (node instanceof NodeBase) {
             String[] ss = ((NodeBase) node).getString().split("/");
             String id = "";
@@ -61,11 +60,11 @@ public class Potion implements TypeSerializer<Potion> {
         return name + "/" + lvl + "/" + duration;
     }
 
-    public Node serialize(@Nonnull Type type, Potion value, @Nonnull Options options) {
+    public Node serialize(Type type, Potion value, Options options) {
         return new NodeBase(options, toString(), false);
     }
 
-    @Nonnull
+
     public Type getRegType() {
         return Potion.class;
     }

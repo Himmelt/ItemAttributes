@@ -13,7 +13,6 @@ import org.soraworld.violet.manager.SpigotManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.util.ChatColor;
 
-import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -42,6 +41,11 @@ public class AttribManager extends SpigotManager {
     private boolean accumulateBlock = false;
     @Setting(comment = "comment.defaultLore")
     private HashMap<String, String> defaultLore = new LinkedHashMap<>();
+    // TODO Test
+    @Setting(path = "loreKeys.health")
+    private String keyHealth = "Health";
+    @Setting(path = "loreKeys.attack")
+    private String keyAttack = "Attack";
 
     public AttribManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
@@ -49,7 +53,7 @@ public class AttribManager extends SpigotManager {
         itemsFile = path.resolve("items.conf");
     }
 
-    @Nonnull
+
     public ChatColor defChatColor() {
         return ChatColor.DARK_GREEN;
     }
@@ -194,7 +198,7 @@ public class AttribManager extends SpigotManager {
         updateInfo(stack, info);
     }
 
-    public static ItemAttrib createAttrib(@Nonnull ItemStack stack) {
+    public static ItemAttrib createAttrib(ItemStack stack) {
         LoreInfo info = getInfo(stack);
         if (info.attrib != null) return info.attrib;
         while (items.containsKey(NextID)) NextID++;
@@ -204,7 +208,7 @@ public class AttribManager extends SpigotManager {
         return attrib;
     }
 
-    @Nonnull
+
     public static ItemAttrib createAttrib(String id) {
         ItemAttrib attrib = getItemAttrib(id);
         if (attrib != null) return attrib;

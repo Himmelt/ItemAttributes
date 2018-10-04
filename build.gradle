@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 group = 'org.soraworld'
-version = '1.0.0'
+version = '1.0.1'
 archivesBaseName = "ItemAttributes"
 
 sourceCompatibility = targetCompatibility = 1.8
@@ -20,7 +20,8 @@ repositories {
 
 dependencies {
     compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
-    compile 'org.soraworld:violet-spigot:2.3.2'
+    //compile 'org.soraworld:violet-spigot:2.3.2'
     compile files('lib/spigot-nms-all.jar')
+    compile files('lib/SpigotViolet-2.3.5-hocon.jar')
     testCompile 'junit:junit:4.12'
 }
