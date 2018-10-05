@@ -33,26 +33,18 @@ public class AttribManager extends SpigotManager {
 
     @Setting(comment = "comment.updateTicks")
     private byte updateTicks = 10;
-    @Setting(comment = "comment.autoUpdate")
-    private boolean autoUpdate = false;
-    @Setting(comment = "comment.accumulateDodge")
-    private boolean accumulateDodge = false;
-    @Setting(comment = "comment.accumulateBlock")
-    private boolean accumulateBlock = false;
+    @Setting(comment = "comment.namePotion")
+    private HashMap<String, String> namePotion = new HashMap<>();
     @Setting(comment = "comment.defaultLore")
     private HashMap<String, String> defaultLore = new LinkedHashMap<>();
-    // TODO Test
-    @Setting(path = "loreKeys.health")
-    private String keyHealth = "Health";
-    @Setting(path = "loreKeys.attack")
-    private String keyAttack = "Attack";
+    @Setting(comment = "comment.loreKey")
+    private LoreKeys loreKeys = new LoreKeys();
 
     public AttribManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
         options.registerType(new Potion());
         itemsFile = path.resolve("items.conf");
     }
-
 
     public ChatColor defChatColor() {
         return ChatColor.DARK_GREEN;
@@ -81,35 +73,37 @@ public class AttribManager extends SpigotManager {
 
     public void afterLoad() {
         setDefaultLore();
+        setDefaultNamePotion();
     }
 
     private void setDefaultLore() {
         if (defaultLore.isEmpty()) {
-            defaultLore.put("health", trans("defLore.health"));
-            defaultLore.put("regain", trans("defLore.regain"));
-            defaultLore.put("walkspeed", trans("defLore.walkspeed"));
-            defaultLore.put("flyspeed", trans("defLore.flyspeed"));
-            defaultLore.put("block", trans("defLore.block"));
-            defaultLore.put("attack", trans("defLore.attack"));
-            defaultLore.put("knock", trans("defLore.knock"));
-            defaultLore.put("armor", trans("defLore.armor"));
-            defaultLore.put("crit", trans("defLore.crit"));
-            defaultLore.put("suck", trans("defLore.suck"));
-            defaultLore.put("onekill", trans("defLore.onekill"));
-            defaultLore.put("thorn", trans("defLore.thorn"));
-            defaultLore.put("rage", trans("defLore.rage"));
-            defaultLore.put("immortal", trans("defLore.immortal"));
-            defaultLore.put("dodge", trans("defLore.dodge"));
-            defaultLore.put("perm", trans("defLore.perm"));
-            defaultLore.put("potion", trans("defLore.potion"));
-            defaultLore.put("spell", trans("defLore.spell"));
-            defaultLore.put("skill", trans("defLore.skill"));
+            for (Map.Entry<String, String> entry : langMap.entrySet()) {
+                String key = entry.getKey();
+                String val = entry.getValue();
+                if (key.startsWith("defLore.")) {
+                    defaultLore.put(key.replaceFirst("defLore\\.", ""), val);
+                }
+            }
+        }
+    }
+
+    private void setDefaultNamePotion() {
+        if (namePotion.isEmpty()) {
+            for (Map.Entry<String, String> entry : langMap.entrySet()) {
+                String key = entry.getKey();
+                String val = entry.getValue();
+                if (key.startsWith("potionName.")) {
+                    namePotion.put(val, key.replaceFirst("potionName\\.", ""));
+                }
+            }
         }
     }
 
     public boolean save() {
         saveItems();
         setDefaultLore();
+        setDefaultNamePotion();
         return super.save();
     }
 

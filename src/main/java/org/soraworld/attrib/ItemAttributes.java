@@ -29,12 +29,9 @@ public class ItemAttributes extends SpigotPlugin {
 
     protected void registerCommands() {
         SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager);
-        command.extractSub(SpigotBaseSubs.class, "lang");
-        command.extractSub(SpigotBaseSubs.class, "debug");
-        command.extractSub(SpigotBaseSubs.class, "save");
-        command.extractSub(SpigotBaseSubs.class, "reload");
-        command.extractSub(SpigotBaseSubs.class, "help");
+        command.extractSub(SpigotBaseSubs.class);
         command.extractSub(CommandAttrib.class);
+        command.setUsage("/attrib ....");
         register(this, command);
     }
 

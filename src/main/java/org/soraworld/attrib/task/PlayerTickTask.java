@@ -21,7 +21,6 @@ public class PlayerTickTask extends BukkitRunnable {
 
     public PlayerTickTask(Player player) {
         this.player = player;
-        // TODO 检查 respawn 和 切换世界 重新加入 EntityPlayer 是否改变
     }
 
     public static boolean isHoldRight(Player player) {

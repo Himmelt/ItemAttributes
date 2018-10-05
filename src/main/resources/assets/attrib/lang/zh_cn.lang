@@ -46,13 +46,8 @@ getPerm = "此物品使用权限 %s"
 
 invalidArgs = "参数不匹配"
 
-comment {
-  updateTicks = "玩家状态更新间隔(建议不要超过2s 即40ticks)"
-  autoUpdate = "在编辑物品时自动更新Lore"
-  defaultLore = "默认物品描述内容"
-}
 # 默认描述
-defLore {
+def {
   health = "穿戴时: 提升 {0} 最大生命值"
   regain = "穿戴时: 每 {0}秒 恢复 {1} 生命"
   walkspeed = "穿戴时: 提升 {0} 步行速度"
@@ -73,31 +68,31 @@ defLore {
   spell = "攻击时: 给对方施加 {2}秒 {0}{1} 效果"
   skill = "右键时: 释放技能 - {0}"
 }
-# 药水效果id
+# 药水效果 id -> name
 potionName {
-  speed = "速度"
-  slow = "缓慢"
-  fast_digging = "急迫"
-  slow_digging = "挖掘疲劳"
-  increase_damage = "力量"
-  heal = "瞬间治疗"
-  harm = "瞬间伤害"
-  jump = "跳跃提升"
-  confusion = "反胃"
-  regeneration = "生命恢复"
-  damage_resistance = "抗性提升"
-  fire_resistance = "防火"
-  water_breathing = "水下呼吸"
-  invisibility = "隐身"
-  blindness = "失明"
-  night_vision = "夜视"
-  hunger = "饥饿"
-  weakness = "虚弱"
-  poison = "中毒"
-  wither = "凋零"
-  health_boost = "生命提升"
-  absorption = "伤害吸收"
-  saturation = "饱和"
+  speed = 速度
+  slow = 缓慢
+  fast_digging = 急迫
+  slow_digging = 挖掘疲劳
+  increase_damage = 力量
+  heal = 瞬间治疗
+  harm = 瞬间伤害
+  jump = 跳跃提升
+  confusion = 反胃
+  regeneration = 生命恢复
+  damage_resistance = 抗性提升
+  fire_resistance = 防火
+  water_breathing = 水下呼吸
+  invisibility = 隐身
+  blindness = 失明
+  night_vision = 夜视
+  hunger = 饥饿
+  weakness = 虚弱
+  poison = 中毒
+  wither = 凋零
+  health_boost = 生命提升
+  absorption = 伤害吸收
+  saturation = 饱和
 }
 # 药水效果等级
 potionLvl {
@@ -111,4 +106,33 @@ potionLvl {
   7 = VIII
   8 = IX
   9 = X
+}
+
+# 配置注释
+comment {
+  updateTicks = "玩家状态更新间隔(建议不要超过2s 即40ticks)"
+  namePotion = "Lore中药水效果的关键词与对应的效果"
+  defaultLore = "默认物品描述内容"
+  loreKey = "使用Lore编辑物品时对应属性的关键词"
+  loreKeys {
+    health = "生命值, 取该行第一个整数."
+    attack = "攻击力, 取该行第一个整数."
+    regain = "每周期生命回复, 取该行第一个小数."
+    walkSpeed = "步行速度, 取该行第一个小数."
+    flySpeed = "飞行速度, 取该行第一个整数."
+    knock = "击退免疫几率, 取该行第一个整数作为百分几率."
+    armor = "防御, 取该行第一个整数作为百分比."
+    block = "格挡, 取该行第一个整数作为百分几率, 第二个整数作为百分比例."
+    crit = "暴击, 取该行第一个整数作为百分几率, 第二个整数作为百分比例."
+    suck = "吸血, 取该行第一个整数作为百分几率, 第二个整数作为百分比例."
+    onekill = "一击击杀, 取该行第一个整数作为百分几率, 第二个整数作为百分比例."
+    thorn = "反伤, 取该行第一个整数作为百分几率, 第二个整数作为百分比例."
+    rage = "残血爆发, 取该行第一个整数作为生命下限百分比例, 第二个整数作为攻击提升百分比例."
+    immortal = "不消耗耐久, 取该行第一个整数作为百分几率."
+    dodge = "闪避, 取该行第一个整数作为百分几率."
+    bind = "绑定, 含有关键字则启用绑定."
+    potion = "药水效果, 取该行第一个药水名作为药水效果, 第一个整数作为药水等级."
+    spell = "魔咒效果, 取该行第一个药水名作为药水效果, 第一个整数作为药水等级."
+    skill = "技能(未实现)."
+  }
 }
