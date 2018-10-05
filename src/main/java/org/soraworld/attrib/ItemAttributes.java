@@ -3,6 +3,7 @@ package org.soraworld.attrib;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.soraworld.attrib.command.CommandAttrib;
+import org.soraworld.attrib.command.CommandLore;
 import org.soraworld.attrib.listener.EventListener;
 import org.soraworld.attrib.manager.AttribManager;
 import org.soraworld.violet.command.SpigotBaseSubs;
@@ -28,10 +29,14 @@ public class ItemAttributes extends SpigotPlugin {
     }
 
     protected void registerCommands() {
-        SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager);
+        SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager, "att");
         command.extractSub(SpigotBaseSubs.class);
         command.extractSub(CommandAttrib.class);
         command.setUsage("/attrib ....");
+        register(this, command);
+        command = new SpigotCommand("atlore", manager.defAdminPerm(), true, manager, "atl");
+        command.extractSub(CommandLore.class);
+        command.setUsage("/atl add|set|remove ...");
         register(this, command);
     }
 

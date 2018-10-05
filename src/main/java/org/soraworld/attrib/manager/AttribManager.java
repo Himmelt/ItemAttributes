@@ -15,6 +15,8 @@ import org.soraworld.violet.util.ChatColor;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.soraworld.attrib.data.ItemAttrib.deserialize;
 import static org.soraworld.attrib.data.ItemAttrib.serialize;
@@ -30,6 +32,7 @@ public class AttribManager extends SpigotManager {
     private static final String AT_PREFIX = "" + ChatColor.RESET + ChatColor.AQUA;
     private static final String PREFIX = "" + ChatColor.RESET;
     private static final String VAR_0 = "{0}", VAR_1 = "{1}", VAR_2 = "{2}";
+    private static final Pattern NUMBER = Pattern.compile("\\d+(\\.\\d+)?");
 
     @Setting(comment = "comment.updateTicks")
     private byte updateTicks = 10;
@@ -186,6 +189,42 @@ public class AttribManager extends SpigotManager {
         stack.setItemMeta(meta);
     }
 
+    public void addLine(ItemStack stack, LoreInfo info, String line) {
+        ItemMeta meta = stack.getItemMeta();
+        List<String> lore = meta.getLore();
+        if (lore == null) lore = new ArrayList<>();
+        if (lore.size() > 0) {
+            String first = lore.get(0);
+            int index = first.indexOf("attrib id:");
+            if (index >= 0) {
+                lore.set(0, AT_PREFIX + info.line0());
+                lore.add(line);
+                meta.setLore(lore);
+                stack.setItemMeta(meta);
+                fetchLine(info.attrib, line);
+                return;
+            }
+        }
+        lore.add(0, AT_PREFIX + info.line0());
+        lore.add(line);
+        meta.setLore(lore);
+        stack.setItemMeta(meta);
+        fetchLine(info.attrib, line);
+    }
+
+    private void fetchLine(ItemAttrib attrib, String line) {
+        Matcher matcher = NUMBER.matcher(line);
+        double val1 = 0, val2 = 0;
+        if (matcher.find()) val1 = Double.valueOf(matcher.group());
+        if (matcher.find()) val2 = Double.valueOf(matcher.group());
+        if (line.contains(loreKeys.keyHealth)) {
+
+        }
+        if (line.contains(loreKeys.keyArmor)) {
+
+        }
+    }
+
     public static void setAttribId(ItemStack stack, ItemAttrib attrib) {
         LoreInfo old = getInfo(stack);
         LoreInfo info = new LoreInfo(old, attrib);
@@ -202,20 +241,19 @@ public class AttribManager extends SpigotManager {
         return attrib;
     }
 
-
     public static ItemAttrib createAttrib(String id) {
         ItemAttrib attrib = getItemAttrib(id);
         if (attrib != null) return attrib;
         while (items.containsKey(NextID)) NextID++;
         attrib = new ItemAttrib(NextID, id);
         items.put(NextID, attrib);
-        names.put(attrib.name, attrib.id);
+        if (attrib.name != null && !attrib.name.isEmpty()) names.put(attrib.name, attrib.id);
         return attrib;
     }
 
     public static void setAttribName(ItemAttrib attrib, String name) {
         names.remove(attrib.name);
-        names.put(name, attrib.id);
+        if (name != null && !name.isEmpty()) names.put(name, attrib.id);
         attrib.name = name;
     }
 
