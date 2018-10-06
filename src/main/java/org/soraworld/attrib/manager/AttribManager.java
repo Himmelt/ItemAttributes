@@ -33,9 +33,12 @@ public class AttribManager extends SpigotManager {
     private static final String PREFIX = "" + ChatColor.RESET;
     private static final String VAR_0 = "{0}", VAR_1 = "{1}", VAR_2 = "{2}";
     private static final Pattern NUMBER = Pattern.compile("\\d+(\\.\\d+)?");
+    private static final Pattern PERM = Pattern.compile("<[A-Za-z0-9._]+>");
 
     @Setting(comment = "comment.updateTicks")
     private byte updateTicks = 10;
+    @Setting(comment = "comment.baubleSlots")
+    public ArrayList<Integer> baubleSlots = new ArrayList<>();
     @Setting(comment = "comment.namePotion")
     private HashMap<String, String> namePotion = new HashMap<>();
     @Setting(comment = "comment.defaultLore")
@@ -50,7 +53,7 @@ public class AttribManager extends SpigotManager {
     }
 
     public ChatColor defChatColor() {
-        return ChatColor.DARK_GREEN;
+        return ChatColor.YELLOW;
     }
 
     public static ItemAttrib getItemAttrib(ItemStack stack) {
@@ -77,6 +80,7 @@ public class AttribManager extends SpigotManager {
     public void afterLoad() {
         setDefaultLore();
         setDefaultNamePotion();
+        baubleSlots.removeIf(slot -> slot < 0 || slot > 35);
     }
 
     private void setDefaultLore() {
@@ -107,6 +111,7 @@ public class AttribManager extends SpigotManager {
         saveItems();
         setDefaultLore();
         setDefaultNamePotion();
+        baubleSlots.removeIf(slot -> slot < 0 || slot > 35);
         return super.save();
     }
 
@@ -199,7 +204,7 @@ public class AttribManager extends SpigotManager {
             if (index >= 0) {
                 lore.set(0, AT_PREFIX + info.line0());
                 lore.add(content);
-                fetchLine(info.attrib, content);
+                fetchAttrib(info.attrib, content);
                 meta.setLore(lore);
                 stack.setItemMeta(meta);
                 return;
@@ -207,7 +212,7 @@ public class AttribManager extends SpigotManager {
         }
         lore.add(0, AT_PREFIX + info.line0());
         lore.add(content);
-        fetchLine(info.attrib, content);
+        fetchAttrib(info.attrib, content);
         meta.setLore(lore);
         stack.setItemMeta(meta);
     }
@@ -220,10 +225,11 @@ public class AttribManager extends SpigotManager {
             String first = lore.get(0);
             int index = first.indexOf("attrib id:");
             if (index >= 0) {
+                String oldLine = lore.get(line);
                 lore.set(0, AT_PREFIX + info.line0());
                 lore.set(line, content);
-                // TODO remove before line attrib
-                fetchLine(info.attrib, content);
+                removeAttrib(info.attrib, oldLine);
+                fetchAttrib(info.attrib, content);
                 meta.setLore(lore);
                 stack.setItemMeta(meta);
                 return;
@@ -232,7 +238,7 @@ public class AttribManager extends SpigotManager {
         lore.add(0, AT_PREFIX + info.line0());
         while (lore.size() < line) lore.add("");
         lore.add(content);
-        fetchLine(info.attrib, content);
+        fetchAttrib(info.attrib, content);
         meta.setLore(lore);
         stack.setItemMeta(meta);
     }
@@ -242,8 +248,8 @@ public class AttribManager extends SpigotManager {
         List<String> lore = meta.getLore();
         if (lore == null) return;
         if (lore.size() > line) {
-            String content = lore.remove(line);
-            // TODO remove before line attrib
+            String oldLine = lore.remove(line);
+            removeAttrib(info.attrib, oldLine);
             String first = lore.get(0);
             int index = first.indexOf("attrib id:");
             if (index >= 0) lore.set(0, AT_PREFIX + info.line0());
@@ -252,7 +258,7 @@ public class AttribManager extends SpigotManager {
         }
     }
 
-    private void fetchLine(ItemAttrib attrib, String line) {
+    private void fetchAttrib(ItemAttrib attrib, String line) {
         Matcher matcher = NUMBER.matcher(line);
         double val1 = 0, val2 = 0;
         if (matcher.find()) val1 = Double.valueOf(matcher.group());
@@ -261,13 +267,19 @@ public class AttribManager extends SpigotManager {
         else if (line.contains(loreKeys.keyAttack)) attrib.attack = (int) val1;
         else if (line.contains(loreKeys.keyRegain)) attrib.regain = (float) val1;
         else if (line.contains(loreKeys.keyWalkSpeed)) attrib.walkspeed = (float) val1;
-        else if (line.contains(loreKeys.keyFlySpeed)) attrib.walkspeed = (float) val1;
+        else if (line.contains(loreKeys.keyFlySpeed)) attrib.flyspeed = (float) val1;
         else if (line.contains(loreKeys.keyKnock)) attrib.knock = (float) (val1 / 100.0D);
         else if (line.contains(loreKeys.keyArmor)) attrib.armor = (float) (val1 / 100.0D);
         else if (line.contains(loreKeys.keyDodge)) attrib.dodgeChance = (float) (val1 / 100.0D);
         else if (line.contains(loreKeys.keyBind)) attrib.bindEnable = true;
         else if (line.contains(loreKeys.keyImmortal)) attrib.immortalChance = (float) (val1 / 100.0D);
-        else if (line.contains(loreKeys.keyBlock)) {
+        else if (line.contains(loreKeys.keyPerm)) {
+            Matcher mat = PERM.matcher(line);
+            if (mat.find()) {
+                String text = mat.group();
+                attrib.perm = text.substring(1, text.length() - 1);
+            }
+        } else if (line.contains(loreKeys.keyBlock)) {
             attrib.blockChance = (float) (val1 / 100.0D);
             attrib.blockRatio = (float) (val2 / 100.0D);
         } else if (line.contains(loreKeys.keyCrit)) {
@@ -289,6 +301,33 @@ public class AttribManager extends SpigotManager {
             attrib.potions.add(new Potion(getPotionName(line), (int) val1));
         } else if (line.contains(loreKeys.keySpell)) {
             attrib.spells.add(new Potion(getPotionName(line), (int) val1, (int) val2));
+        } else if (line.contains(loreKeys.keySkill)) {
+            // TODO attrib.skills.add("skill");
+        }
+    }
+
+    private void removeAttrib(ItemAttrib attrib, String line) {
+        if (line.contains(loreKeys.keyHealth)) attrib.health = 0;
+        else if (line.contains(loreKeys.keyAttack)) attrib.attack = 0;
+        else if (line.contains(loreKeys.keyRegain)) attrib.regain = 0;
+        else if (line.contains(loreKeys.keyWalkSpeed)) attrib.walkspeed = 0;
+        else if (line.contains(loreKeys.keyFlySpeed)) attrib.flyspeed = 0;
+        else if (line.contains(loreKeys.keyKnock)) attrib.knock = 0;
+        else if (line.contains(loreKeys.keyArmor)) attrib.armor = 0;
+        else if (line.contains(loreKeys.keyDodge)) attrib.dodgeChance = 0;
+        else if (line.contains(loreKeys.keyBind)) attrib.bindEnable = false;
+        else if (line.contains(loreKeys.keyPerm)) attrib.perm = null;
+        else if (line.contains(loreKeys.keyImmortal)) attrib.immortalChance = 0;
+        else if (line.contains(loreKeys.keyBlock)) attrib.blockChance = attrib.blockRatio = 0;
+        else if (line.contains(loreKeys.keyCrit)) attrib.critChance = attrib.critRatio = 0;
+        else if (line.contains(loreKeys.keySuck)) attrib.suckChance = attrib.suckRatio = 0;
+        else if (line.contains(loreKeys.keyOneKill)) attrib.onekillChance = attrib.onekillRatio = 0;
+        else if (line.contains(loreKeys.keyThorn)) attrib.thornChance = attrib.thornRatio = 0;
+        else if (line.contains(loreKeys.keyRage)) attrib.rageHealth = attrib.rageRatio = 0;
+        else if (line.contains(loreKeys.keyPotion)) {
+            attrib.potions.remove(new Potion(getPotionName(line)));
+        } else if (line.contains(loreKeys.keySpell)) {
+            attrib.spells.remove(new Potion(getPotionName(line)));
         } else if (line.contains(loreKeys.keySkill)) {
             // TODO attrib.skills.add("skill");
         }
@@ -334,7 +373,7 @@ public class AttribManager extends SpigotManager {
     }
 
     public void startTask(Player player) {
-        PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> PlayerTickTask.createTask(player));
+        PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> PlayerTickTask.createTask(player, this));
         try {
             task.runTaskTimer(plugin, 1, updateTicks);
         } catch (Throwable e) {

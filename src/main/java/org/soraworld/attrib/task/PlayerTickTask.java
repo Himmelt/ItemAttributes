@@ -2,8 +2,10 @@ package org.soraworld.attrib.task;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.soraworld.attrib.data.LoreInfo;
+import org.soraworld.attrib.manager.AttribManager;
 
 import java.util.UUID;
 
@@ -13,6 +15,7 @@ import static org.soraworld.violet.nms.Version.*;
 public class PlayerTickTask extends BukkitRunnable {
 
     private final Player player;
+    private static AttribManager manager;
 
     static final UUID maxHealthUUID = UUID.fromString("e0b4701b-9843-4aa0-9aa5-4c7c97be3d27");
     static final UUID moveSpeedUUID = UUID.fromString("23d25cb0-1b72-44c8-b125-3aa3c8b5fe0f");
@@ -37,7 +40,8 @@ public class PlayerTickTask extends BukkitRunnable {
         return false;
     }
 
-    public static PlayerTickTask createTask(Player player) {
+    public static PlayerTickTask createTask(Player player, AttribManager manager) {
+        PlayerTickTask.manager = manager;
         if (v1_7_R4) return new v1_7_R4_TickTask(player);
         if (v1_8_R1) return new v1_8_R1_TickTask(player);
         if (v1_8_R3) return new v1_8_R3_TickTask(player);
@@ -59,8 +63,9 @@ public class PlayerTickTask extends BukkitRunnable {
         LoreInfo info = getInfo(player.getItemInHand());
         if (info.attrib != null && info.canUse(player)) attackDamage += info.attrib.attack;
 
+        PlayerInventory inventory = player.getInventory();
         // Check Armors
-        for (ItemStack stack : player.getInventory().getArmorContents()) {
+        for (ItemStack stack : inventory.getArmorContents()) {
             info = getInfo(stack);
             if (info.attrib != null && info.canUse(player)) {
                 maxHealth += info.attrib.health;
@@ -69,6 +74,21 @@ public class PlayerTickTask extends BukkitRunnable {
                 regain += info.attrib.regain;
                 flyspeed += info.attrib.flyspeed;
                 info.attrib.applyPotions(player);
+            }
+        }
+
+        // Check Baubles
+        for (int slot : manager.baubleSlots) {
+            if (slot != inventory.getHeldItemSlot()) {
+                info = getInfo(inventory.getItem(slot));
+                if (info.attrib != null && info.canUse(player)) {
+                    maxHealth += info.attrib.health;
+                    moveSpeed += info.attrib.walkspeed;
+                    knockResist += info.attrib.knock;
+                    regain += info.attrib.regain;
+                    flyspeed += info.attrib.flyspeed;
+                    info.attrib.applyPotions(player);
+                }
             }
         }
 

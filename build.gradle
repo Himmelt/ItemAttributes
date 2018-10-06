@@ -24,3 +24,12 @@ dependencies {
     compile files('lib/spigot-nms-all.jar')
     testCompile 'junit:junit:4.12'
 }
+
+javadoc {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}

@@ -20,14 +20,20 @@ public class Potion implements TypeSerializer<Potion> {
         duration = 80;
     }
 
+    public Potion(String name) {
+        this.name = name == null ? "" : name;
+        lvl = 0;
+        duration = 80;
+    }
+
     public Potion(String name, int lvl) {
-        this.name = name;
+        this.name = name == null ? "" : name;
         this.lvl = lvl < 0 ? 0 : lvl;
         this.duration = 80;
     }
 
     public Potion(String name, int lvl, int duration) {
-        this.name = name;
+        this.name = name == null ? "" : name;
         this.lvl = lvl < 0 ? 0 : lvl;
         this.duration = duration;
     }

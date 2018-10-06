@@ -3,32 +3,36 @@ ItemAttributes
 
 攻击力相关的属性只能设置在武器上，
 防御相关的属性只能设置在护甲上
-范围伤害 callEvent
+技能 范围伤害 callEvent
 
-// dodge will not cause thorn
-
-### 命令
+### attrib 命令(简写 att)
 ```
-/attrib health [health(整数)]     获取/设置 手持物品的生命提升属性(如果物品不含自定义属性，会创建新的自定义物品)
-/attrib regain [value(小数)]      获取/设置 生命恢复 (每循环)
-/attrib walkspeed [speed(小数)]   获取/设置 步行速度
-/attrib flyspeed [speed(小数)]    获取/设置 飞行速度
-/attrib attack [damage(整数)]     获取/设置 攻击力提升
-/attrib knock [0-100]             获取/设置 免疫击退几率
-/attrib armor [0-100]             获取/设置 防御伤害值百分比
-/attrib block [chance] [ratio]    获取/设置 格挡几率，格挡比
-/attrib dodge [chance(0-100)]     获取/设置 闪避几率
-/attrib crit [chance] [ratio]     获取/设置 暴击几率，暴击伤害比
-/attrib suck [chance] [ratio]     获取/设置 吸血几率，吸血伤害比
-/attrib onekill [chance] [ratio]  获取/设置 一击必杀几率，及 对方血量下限百分比
-/attrib thorn [chance] [ratio]    获取/设置 反伤几率，反伤比
-/attrib immortal [chance]         获取/设置 物品不耗耐久的几率
-/attrib rage [health] [ratio]     获取/设置 濒死爆发的生命下限百分比，攻击力提升百分比
-/attrib bind [true|false]         获取/设置 是否启用绑定
-/attrib perm [perm]               获取/设置 使用权限
-/attrib update                    更新手持物品的lore
-/attrib setid <id|name>           设置手持物品id或name，如果物品不含自定义信息，则创建
-/attrib setname <id> <name>       设置id对应物品的name
+/att health [health(整数)]     获取/设置 手持物品的生命提升属性(如果物品不含自定义属性，会创建新的自定义物品)
+/att regain [value(小数)]      获取/设置 生命恢复 (每循环)
+/att walkspeed [speed(小数)]   获取/设置 步行速度
+/att flyspeed [speed(小数)]    获取/设置 飞行速度
+/att attack [damage(整数)]     获取/设置 攻击力提升
+/att knock [0-100]             获取/设置 免疫击退几率
+/att armor [0-100]             获取/设置 防御伤害值百分比
+/att block [chance] [ratio]    获取/设置 格挡几率，格挡比
+/att dodge [chance(0-100)]     获取/设置 闪避几率
+/att crit [chance] [ratio]     获取/设置 暴击几率，暴击伤害比
+/att suck [chance] [ratio]     获取/设置 吸血几率，吸血伤害比
+/att onekill [chance] [ratio]  获取/设置 一击必杀几率，及 对方血量下限百分比
+/att thorn [chance] [ratio]    获取/设置 反伤几率，反伤比
+/att immortal [chance]         获取/设置 物品不耗耐久的几率
+/att rage [health] [ratio]     获取/设置 濒死爆发的生命下限百分比，攻击力提升百分比
+/att bind [true|false]         获取/设置 是否启用绑定
+/att perm [perm]               获取/设置 使用权限
+/att update                    更新手持物品的lore
+/att setid <id|name>           设置手持物品id或name，如果物品不含自定义信息，则创建
+/att setname <id> <name>       设置id对应物品的name
+```
+### atlore 命令(简写 atl)
+```
+/atl add <lore>                给物品添加描述, 并更新自定义物品属性(不存在则创建), 多个空格请使用 <sp> 代替.
+/atl set <line> <lore>         给物品设置某行描述, 行不存在则用空行填充, 并更新自定义物品属性(不存在则创建), 多个空格请使用 <sp> 代替.
+/atl remove <line>             给物品移除某行描述, 如果包含自定义属性, 则移除自定义属性.
 ```
 
 ### 配置

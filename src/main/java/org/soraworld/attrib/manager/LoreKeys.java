@@ -23,6 +23,8 @@ public class LoreKeys {
     public String keyDodge = "Dodge";
     @Setting(comment = "comment.loreKeys.bind")
     public String keyBind = "BindEnable";
+    @Setting(comment = "comment.loreKeys.perm")
+    public String keyPerm = "Permission";
     @Setting(comment = "comment.loreKeys.immortal")
     public String keyImmortal = "Immortal";
     @Setting(comment = "comment.loreKeys.block")

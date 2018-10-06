@@ -17,6 +17,7 @@ import static org.soraworld.attrib.manager.AttribManager.getInfo;
 
 public final class CommandLore {
     /**
+     * 给物品添加描述, 并更新自定义物品属性(不存在则创建)<br>
      * 多个空格请使用{@code <sp>}代替.
      *
      * @param self   命令封装自身
@@ -39,6 +40,15 @@ public final class CommandLore {
         } else manager.sendKey(player, "emptyArgs");
     }
 
+    /**
+     * 给物品设置某行描述, 行不存在则用空行填充,<br>
+     * 并更新自定义物品属性(不存在则创建)<br>
+     * 多个空格请使用{@code <sp>}代替.
+     *
+     * @param self   命令封装自身
+     * @param sender 命令发送者
+     * @param args   参数
+     */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/atl set <line> <lore>")
     public static void set(SpigotCommand self, CommandSender sender, Args args) {
         AttribManager manager = (AttribManager) self.manager;
@@ -66,6 +76,13 @@ public final class CommandLore {
         } else manager.sendKey(player, "emptyArgs");
     }
 
+    /**
+     * 给物品移除某行描述.
+     *
+     * @param self   命令封装自身
+     * @param sender 命令发送者
+     * @param args   参数
+     */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/atl remove <line>")
     public static void remove(SpigotCommand self, CommandSender sender, Args args) {
         AttribManager manager = (AttribManager) self.manager;
