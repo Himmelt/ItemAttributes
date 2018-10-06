@@ -118,7 +118,7 @@ public final class CommandAttrib {
     }
 
     /**
-     * 护甲/防御(整数)
+     * 护甲/防御(百分比)
      * 建议使用位置：护甲
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib armor [armor]")

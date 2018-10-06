@@ -20,6 +20,18 @@ public class Potion implements TypeSerializer<Potion> {
         duration = 80;
     }
 
+    public Potion(String name, int lvl) {
+        this.name = name;
+        this.lvl = lvl < 0 ? 0 : lvl;
+        this.duration = 80;
+    }
+
+    public Potion(String name, int lvl, int duration) {
+        this.name = name;
+        this.lvl = lvl < 0 ? 0 : lvl;
+        this.duration = duration;
+    }
+
     public int hashCode() {
         return name.hashCode();
     }
@@ -29,12 +41,6 @@ public class Potion implements TypeSerializer<Potion> {
         if (this == obj) return true;
         if (obj instanceof Potion) return this.name.equals(((Potion) obj).name);
         return false;
-    }
-
-    public Potion(String name, int lvl, int duration) {
-        this.name = name;
-        this.lvl = lvl < 0 ? 0 : lvl;
-        this.duration = duration;
     }
 
     public PotionEffect getEffect() {

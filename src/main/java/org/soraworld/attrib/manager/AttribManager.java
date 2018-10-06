@@ -189,7 +189,7 @@ public class AttribManager extends SpigotManager {
         stack.setItemMeta(meta);
     }
 
-    public void addLine(ItemStack stack, LoreInfo info, String line) {
+    public void addLine(ItemStack stack, LoreInfo info, String content) {
         ItemMeta meta = stack.getItemMeta();
         List<String> lore = meta.getLore();
         if (lore == null) lore = new ArrayList<>();
@@ -198,18 +198,58 @@ public class AttribManager extends SpigotManager {
             int index = first.indexOf("attrib id:");
             if (index >= 0) {
                 lore.set(0, AT_PREFIX + info.line0());
-                lore.add(line);
+                lore.add(content);
+                fetchLine(info.attrib, content);
                 meta.setLore(lore);
                 stack.setItemMeta(meta);
-                fetchLine(info.attrib, line);
                 return;
             }
         }
         lore.add(0, AT_PREFIX + info.line0());
-        lore.add(line);
+        lore.add(content);
+        fetchLine(info.attrib, content);
         meta.setLore(lore);
         stack.setItemMeta(meta);
-        fetchLine(info.attrib, line);
+    }
+
+    public void setLine(ItemStack stack, LoreInfo info, String content, int line) {
+        ItemMeta meta = stack.getItemMeta();
+        List<String> lore = meta.getLore();
+        if (lore == null) lore = new ArrayList<>();
+        if (lore.size() > line) {
+            String first = lore.get(0);
+            int index = first.indexOf("attrib id:");
+            if (index >= 0) {
+                lore.set(0, AT_PREFIX + info.line0());
+                lore.set(line, content);
+                // TODO remove before line attrib
+                fetchLine(info.attrib, content);
+                meta.setLore(lore);
+                stack.setItemMeta(meta);
+                return;
+            }
+        }
+        lore.add(0, AT_PREFIX + info.line0());
+        while (lore.size() < line) lore.add("");
+        lore.add(content);
+        fetchLine(info.attrib, content);
+        meta.setLore(lore);
+        stack.setItemMeta(meta);
+    }
+
+    public void removeLine(ItemStack stack, LoreInfo info, int line) {
+        ItemMeta meta = stack.getItemMeta();
+        List<String> lore = meta.getLore();
+        if (lore == null) return;
+        if (lore.size() > line) {
+            String content = lore.remove(line);
+            // TODO remove before line attrib
+            String first = lore.get(0);
+            int index = first.indexOf("attrib id:");
+            if (index >= 0) lore.set(0, AT_PREFIX + info.line0());
+            meta.setLore(lore);
+            stack.setItemMeta(meta);
+        }
     }
 
     private void fetchLine(ItemAttrib attrib, String line) {
@@ -217,12 +257,48 @@ public class AttribManager extends SpigotManager {
         double val1 = 0, val2 = 0;
         if (matcher.find()) val1 = Double.valueOf(matcher.group());
         if (matcher.find()) val2 = Double.valueOf(matcher.group());
-        if (line.contains(loreKeys.keyHealth)) {
-
+        if (line.contains(loreKeys.keyHealth)) attrib.health = (int) val1;
+        else if (line.contains(loreKeys.keyAttack)) attrib.attack = (int) val1;
+        else if (line.contains(loreKeys.keyRegain)) attrib.regain = (float) val1;
+        else if (line.contains(loreKeys.keyWalkSpeed)) attrib.walkspeed = (float) val1;
+        else if (line.contains(loreKeys.keyFlySpeed)) attrib.walkspeed = (float) val1;
+        else if (line.contains(loreKeys.keyKnock)) attrib.knock = (float) (val1 / 100.0D);
+        else if (line.contains(loreKeys.keyArmor)) attrib.armor = (float) (val1 / 100.0D);
+        else if (line.contains(loreKeys.keyDodge)) attrib.dodgeChance = (float) (val1 / 100.0D);
+        else if (line.contains(loreKeys.keyBind)) attrib.bindEnable = true;
+        else if (line.contains(loreKeys.keyImmortal)) attrib.immortalChance = (float) (val1 / 100.0D);
+        else if (line.contains(loreKeys.keyBlock)) {
+            attrib.blockChance = (float) (val1 / 100.0D);
+            attrib.blockRatio = (float) (val2 / 100.0D);
+        } else if (line.contains(loreKeys.keyCrit)) {
+            attrib.critChance = (float) (val1 / 100.0D);
+            attrib.critRatio = (float) (val2 / 100.0D);
+        } else if (line.contains(loreKeys.keySuck)) {
+            attrib.suckChance = (float) (val1 / 100.0D);
+            attrib.suckRatio = (float) (val2 / 100.0D);
+        } else if (line.contains(loreKeys.keyOneKill)) {
+            attrib.onekillChance = (float) (val1 / 100.0D);
+            attrib.onekillRatio = (float) (val2 / 100.0D);
+        } else if (line.contains(loreKeys.keyThorn)) {
+            attrib.thornChance = (float) (val1 / 100.0D);
+            attrib.thornRatio = (float) (val2 / 100.0D);
+        } else if (line.contains(loreKeys.keyRage)) {
+            attrib.rageHealth = (float) (val1 / 100.0D);
+            attrib.rageRatio = (float) (val2 / 100.0D);
+        } else if (line.contains(loreKeys.keyPotion)) {
+            attrib.potions.add(new Potion(getPotionName(line), (int) val1));
+        } else if (line.contains(loreKeys.keySpell)) {
+            attrib.spells.add(new Potion(getPotionName(line), (int) val1, (int) val2));
+        } else if (line.contains(loreKeys.keySkill)) {
+            // TODO attrib.skills.add("skill");
         }
-        if (line.contains(loreKeys.keyArmor)) {
+    }
 
+    private String getPotionName(String line) {
+        for (Map.Entry<String, String> entry : namePotion.entrySet()) {
+            if (line.contains(entry.getKey())) return entry.getValue();
         }
+        return "";
     }
 
     public static void setAttribId(ItemStack stack, ItemAttrib attrib) {

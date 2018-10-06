@@ -19,6 +19,12 @@ public class LoreKeys {
     public String keyKnock = "KnockResistance";
     @Setting(comment = "comment.loreKeys.armor")
     public String keyArmor = "Armor";
+    @Setting(comment = "comment.loreKeys.dodge")
+    public String keyDodge = "Dodge";
+    @Setting(comment = "comment.loreKeys.bind")
+    public String keyBind = "BindEnable";
+    @Setting(comment = "comment.loreKeys.immortal")
+    public String keyImmortal = "Immortal";
     @Setting(comment = "comment.loreKeys.block")
     public String keyBlock = "Block";
     @Setting(comment = "comment.loreKeys.crit")
@@ -31,12 +37,6 @@ public class LoreKeys {
     public String keyThorn = "Thorn";
     @Setting(comment = "comment.loreKeys.rage")
     public String keyRage = "Rage";
-    @Setting(comment = "comment.loreKeys.immortal")
-    public String keyImmortal = "Immortal";
-    @Setting(comment = "comment.loreKeys.dodge")
-    public String keyDodge = "Dodge";
-    @Setting(comment = "comment.loreKeys.bind")
-    public String keyBind = "BindEnable";
     @Setting(comment = "comment.loreKeys.potion")
     public String keyPotion = "Potion";
     @Setting(comment = "comment.loreKeys.spell")
