@@ -44,6 +44,8 @@ public class ItemAttrib {
     @Setting
     public float dodgeChance = 0;
     @Setting
+    public float fireChance = 0;// TODO fire
+    @Setting
     public boolean bindEnable = false;
     @Setting
     public String perm = null;
