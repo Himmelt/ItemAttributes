@@ -136,7 +136,7 @@ public class AttribManager extends SpigotManager {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            saveItems();
+            //saveItems();
         }
     }
 
