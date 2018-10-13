@@ -72,7 +72,7 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
-    public void on(PlayerAnimationEvent event) {
+    public void onPlayerAnimation(PlayerAnimationEvent event) {
         Player player = event.getPlayer();
         if (!getInfo(player.getItemInHand()).canUse(player)) {
             event.setCancelled(true);
