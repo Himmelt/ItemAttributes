@@ -85,6 +85,7 @@ public class EventListener implements Listener {
         Object e1 = event.getDamager();
         if (e1 instanceof Projectile) e1 = ((Projectile) e1).getShooter();
         Entity e2 = event.getEntity();
+        // TODO Projectile
         if (e1 instanceof Damageable && e2 instanceof Damageable) {
             Damageable de1 = (Damageable) e1;
             Damageable de2 = (Damageable) e2;
@@ -132,14 +133,9 @@ public class EventListener implements Listener {
         manager.startTask(event.getPlayer());
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerKick(PlayerKickEvent event) {
-        manager.stopTask(event.getPlayer());
-    }
-
     @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        manager.stopTask(event.getPlayer());
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        manager.startTask(event.getPlayer());
     }
 
     private static PlayerAttrib getPlayerAttrib(Player player) {

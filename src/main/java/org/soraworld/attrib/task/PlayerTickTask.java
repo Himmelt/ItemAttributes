@@ -56,31 +56,18 @@ public class PlayerTickTask extends BukkitRunnable {
     }
 
     public void run() {
-        float regain = 0.0F, flyspeed = 0.1F;
-        double maxHealth = 0.0D, moveSpeed = 0.0D, attackDamage = 0.0D, knockResist = 0.0D;
+        if (player.isValid()) {
+            float regain = 0.0F, flyspeed = 0.1F;
+            double maxHealth = 0.0D, moveSpeed = 0.0D, attackDamage = 0.0D, knockResist = 0.0D;
 
-        // Check ItemInHand
-        LoreInfo info = getInfo(player.getItemInHand());
-        if (info.attrib != null && info.canUse(player)) attackDamage += info.attrib.attack;
+            // Check ItemInHand
+            LoreInfo info = getInfo(player.getItemInHand());
+            if (info.attrib != null && info.canUse(player)) attackDamage += info.attrib.attack;
 
-        PlayerInventory inventory = player.getInventory();
-        // Check Armors
-        for (ItemStack stack : inventory.getArmorContents()) {
-            info = getInfo(stack);
-            if (info.attrib != null && info.canUse(player)) {
-                maxHealth += info.attrib.health;
-                moveSpeed += info.attrib.walkspeed;
-                knockResist += info.attrib.knock;
-                regain += info.attrib.regain;
-                flyspeed += info.attrib.flyspeed;
-                info.attrib.applyPotions(player);
-            }
-        }
-
-        // Check Baubles
-        for (int slot : manager.baubleSlots) {
-            if (slot != inventory.getHeldItemSlot()) {
-                info = getInfo(inventory.getItem(slot));
+            PlayerInventory inventory = player.getInventory();
+            // Check Armors
+            for (ItemStack stack : inventory.getArmorContents()) {
+                info = getInfo(stack);
                 if (info.attrib != null && info.canUse(player)) {
                     maxHealth += info.attrib.health;
                     moveSpeed += info.attrib.walkspeed;
@@ -90,14 +77,29 @@ public class PlayerTickTask extends BukkitRunnable {
                     info.attrib.applyPotions(player);
                 }
             }
-        }
 
-        updateModifier(maxHealth, moveSpeed, attackDamage, knockResist);
+            // Check Baubles
+            for (int slot : manager.baubleSlots) {
+                if (slot != inventory.getHeldItemSlot()) {
+                    info = getInfo(inventory.getItem(slot));
+                    if (info.attrib != null && info.canUse(player)) {
+                        maxHealth += info.attrib.health;
+                        moveSpeed += info.attrib.walkspeed;
+                        knockResist += info.attrib.knock;
+                        regain += info.attrib.regain;
+                        flyspeed += info.attrib.flyspeed;
+                        info.attrib.applyPotions(player);
+                    }
+                }
+            }
 
-        player.setFlySpeed(flyspeed > 1.0F ? 1.0F : flyspeed);
-        maxHealth = player.getMaxHealth();
-        double health = player.getHealth() + regain;
-        player.setHealth(health < 0 ? 0 : health > maxHealth ? maxHealth : health);
+            updateModifier(maxHealth, moveSpeed, attackDamage, knockResist);
+
+            player.setFlySpeed(flyspeed > 1.0F ? 1.0F : flyspeed);
+            maxHealth = player.getMaxHealth();
+            double health = player.getHealth() + regain;
+            player.setHealth(health < 0 ? 0 : health > maxHealth ? maxHealth : health);
+        } else cancel();
     }
 
     public void updateModifier(double maxHealth, double moveSpeed, double attackDamage, double knockResist) {

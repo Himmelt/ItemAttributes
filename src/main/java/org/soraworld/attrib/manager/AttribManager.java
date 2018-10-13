@@ -373,18 +373,7 @@ public class AttribManager extends SpigotManager {
     }
 
     public void startTask(Player player) {
-        PlayerTickTask task = tasks.computeIfAbsent(player.getUniqueId(), uuid -> PlayerTickTask.createTask(player, this));
-        try {
-            task.runTaskTimer(plugin, 1, updateTicks);
-        } catch (Throwable e) {
-            if (debug) e.printStackTrace();
-        }
-    }
-
-    public void stopTask(Player player) {
-        PlayerTickTask task = tasks.get(player.getUniqueId());
-        if (task != null) task.cancel();
-        tasks.remove(player.getUniqueId());
+        PlayerTickTask.createTask(player, this).runTaskTimer(plugin, updateTicks, updateTicks);
     }
 
     public List<String> getLore(LoreInfo info) {
