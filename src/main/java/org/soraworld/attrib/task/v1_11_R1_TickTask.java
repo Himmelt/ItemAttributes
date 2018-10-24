@@ -7,7 +7,7 @@ import net.minecraft.server.v1_7_R4.GenericAttributes;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
-public class v1_11_R1_TickTask extends PlayerTickTask {
+class v1_11_R1_TickTask extends PlayerTickTask {
 
     private AttributeInstance maxHealthInstance;
     private AttributeInstance moveSpeedInstance;

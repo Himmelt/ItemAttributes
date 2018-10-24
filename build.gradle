@@ -11,6 +11,10 @@ tasks.withType(JavaCompile) {
 }
 
 repositories {
+    maven {
+        name = 'aliyun'
+        url = 'https://maven.aliyun.com/repository/public'
+    }
     jcenter()
     maven {
         name = 'spigot'
