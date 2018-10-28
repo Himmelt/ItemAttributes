@@ -8,9 +8,9 @@ import java.util.HashSet;
 
 public class ItemAttrib {
 
-    public final int id;
+    public int globalId = 0;
     @Setting
-    public String name;
+    public String name = "";
     @Setting
     public int suit = -1;
     @Setting
@@ -56,12 +56,15 @@ public class ItemAttrib {
     @Setting
     public HashSet<String> skills = new HashSet<>();
 
+    public ItemAttrib() {
+    }
+
     public ItemAttrib(int id) {
-        this.id = id;
+        this.globalId = id;
     }
 
     public ItemAttrib(int id, String name) {
-        this.id = id;
+        this.globalId = id;
         this.name = name;
     }
 

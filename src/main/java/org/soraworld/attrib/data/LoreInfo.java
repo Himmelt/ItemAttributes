@@ -12,14 +12,14 @@ public class LoreInfo {
         this.owner = owner;
         this.inlay = null;
         this.attrib = attrib;
-        this.id = attrib == null ? -1 : attrib.id;
+        this.id = attrib == null ? -1 : attrib.globalId;
     }
 
     public LoreInfo(LoreInfo info, ItemAttrib attrib) {
         this.owner = info.owner;
         this.inlay = info.inlay;
         this.attrib = attrib;
-        this.id = attrib == null ? -1 : attrib.id;
+        this.id = attrib == null ? -1 : attrib.globalId;
     }
 
     public boolean canUse(HumanEntity player) {

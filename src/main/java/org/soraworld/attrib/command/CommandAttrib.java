@@ -8,6 +8,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.soraworld.attrib.data.ItemAttrib;
 import org.soraworld.attrib.data.LoreInfo;
 import org.soraworld.attrib.manager.AttribManager;
+import org.soraworld.attrib.nbt.NBTUtil;
 import org.soraworld.violet.command.Args;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.command.Sub;
@@ -16,6 +17,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static org.soraworld.attrib.manager.AttribManager.*;
+import static org.soraworld.attrib.nbt.NBTUtil.getOrCreateAttrib;
+import static org.soraworld.attrib.nbt.NBTUtil.offerAttrib;
 
 public final class CommandAttrib {
 
@@ -59,7 +62,7 @@ public final class CommandAttrib {
      */
     @Sub(perm = "admin", onlyPlayer = true, usage = "/attrib walkspeed [speed]")
     public static void walkspeed(SpigotCommand self, CommandSender sender, Args args) {
-        getSetFloat(
+        getSetFloatNBT(
                 (AttribManager) self.manager,
                 (Player) sender,
                 args, "WalkSpeed",
@@ -344,8 +347,8 @@ public final class CommandAttrib {
                         player.setItemInHand(stack);
                     } else manager.sendKey(player, "noItemId");
                 } else {
-                    ItemAttrib attrib = createAttrib(args.first());
-                    updateInfo(stack, new LoreInfo(info, attrib));
+                    createAttribByName(args.first());
+                    //updateInfo(stack, new LoreInfo(info, attrib));
                     player.setItemInHand(stack);
                 }
             } else manager.sendKey(player, "emptyHand");
@@ -372,6 +375,151 @@ public final class CommandAttrib {
         } else self.manager.sendKey(sender, "invalidArgs");
     }
 
+    private static void getSetIntNBT(AttribManager manager, Player player, Args args, String Name, int min, int max, BiConsumer<ItemAttrib, Integer> consumer, Function<ItemAttrib, Integer> fun) {
+        ItemStack stack = player.getInventory().getItemInHand();
+        if (stack != null && stack.getType() != Material.AIR) {
+            if (args.notEmpty()) {
+                ItemAttrib attrib = getOrCreateAttrib(stack);
+                if ("GlobalId".equals(Name)) {
+                    try {
+                        attrib.globalId = Integer.valueOf(args.first());
+                        offerAttrib(stack, attrib);
+                        manager.sendKey(player, "set" + Name, attrib.globalId);
+                        //player.setItemInHand(HandTypes.MAIN_HAND, stack);
+                    } catch (NumberFormatException ignored) {
+                        manager.sendKey(player, "invalidInt");
+                    }
+                    return;
+                }
+                if (attrib.globalId > 0) {
+                    ItemAttrib global = getGlobalAttrib(attrib.globalId);
+                    if (global != null) {
+                        try {
+                            int value = Integer.valueOf(args.first());
+                            value = value < min ? min : value > max ? max : value;
+                            consumer.accept(global, value);
+                            manager.saveItems();
+                            manager.sendKey(player, "global.set" + Name, value);
+                        } catch (NumberFormatException ignored) {
+                            manager.sendKey(player, "invalidInt");
+                        }
+                    } else manager.sendKey(player, "global.idNotExist");
+                    return;
+                }
+                try {
+                    int value = Integer.valueOf(args.first());
+                    value = value < min ? min : value > max ? max : value;
+                    consumer.accept(attrib, value);
+                    offerAttrib(stack, attrib);
+                    manager.sendKey(player, "set" + Name, value);
+                    //player.setItemInHand(HandTypes.MAIN_HAND, stack);
+                } catch (NumberFormatException ignored) {
+                    manager.sendKey(player, "invalidInt");
+                }
+            } else {
+                ItemAttrib attrib = NBTUtil.getAttrib(stack);
+                if (attrib != null) {
+                    if (attrib.globalId > 0) {
+                        ItemAttrib global = getGlobalAttrib(attrib.globalId);
+                        if (global != null) {
+                            manager.sendKey(player, "global.get" + Name, fun.apply(global));
+                        } else manager.sendKey(player, "idNotExist");
+                    } else manager.sendKey(player, "get" + Name, fun.apply(attrib));
+                } else manager.sendKey(player, "noAttrib");
+            }
+        } else manager.sendKey(player, "emptyHand");
+    }
+
+    private static void getSetFloatNBT(AttribManager manager, Player player, Args args, String Name, float min, float max, BiConsumer<ItemAttrib, Float> consumer, Function<ItemAttrib, Float> fun) {
+        ItemStack stack = player.getInventory().getItemInHand();
+        if (stack != null && stack.getType() != Material.AIR) {
+            if (args.notEmpty()) {
+                ItemAttrib attrib = getOrCreateAttrib(stack);
+                if (attrib.globalId > 0) {
+                    ItemAttrib global = getGlobalAttrib(attrib.globalId);
+                    if (global != null) {
+                        try {
+                            float value = Float.valueOf(args.first());
+                            value = value < min ? min : value > max ? max : value;
+                            consumer.accept(global, value);
+                            manager.saveItems();
+                            manager.sendKey(player, "global.set" + Name, value);
+                        } catch (NumberFormatException ignored) {
+                            manager.sendKey(player, "invalidFloat");
+                        }
+                    } else manager.sendKey(player, "idNotExist");
+                } else {
+                    try {
+                        float value = Float.valueOf(args.first());
+                        value = value < min ? min : value > max ? max : value;
+                        consumer.accept(attrib, value);
+                        offerAttrib(stack, attrib);
+                        manager.sendKey(player, "set" + Name, value);
+                        //player.setItemInHand(HandTypes.MAIN_HAND, stack);
+                    } catch (NumberFormatException ignored) {
+                        manager.sendKey(player, "invalidFloat");
+                    }
+                }
+            } else {
+                ItemAttrib attrib = NBTUtil.getAttrib(stack);
+                if (attrib != null) {
+                    if (attrib.globalId > 0) {
+                        ItemAttrib global = getGlobalAttrib(attrib.globalId);
+                        if (global != null) {
+                            manager.sendKey(player, "global.get" + Name, fun.apply(global));
+                        } else manager.sendKey(player, "idNotExist");
+                    } else manager.sendKey(player, "get" + Name, fun.apply(attrib));
+
+                } else manager.sendKey(player, "noAttrib");
+            }
+        } else manager.sendKey(player, "emptyHand");
+    }
+
+    private static void getSetDouble(AttribManager manager, Player player, Args args, String Name, double min, double max, BiConsumer<ItemAttrib, Double> consumer, Function<ItemAttrib, Double> fun) {
+        ItemStack stack = player.getInventory().getItemInHand();
+        if (stack != null && stack.getType() != Material.AIR) {
+            if (args.notEmpty()) {
+                ItemAttrib attrib = NBTUtil.getOrCreateAttrib(stack);
+                if (attrib.globalId > 0) {
+                    ItemAttrib global = getGlobalAttrib(attrib.globalId);
+                    if (global != null) {
+                        try {
+                            double value = Double.valueOf(args.first());
+                            value = value < min ? min : value > max ? max : value;
+                            consumer.accept(global, value);
+                            manager.saveItems();
+                            manager.sendKey(player, "global.set" + Name, value);
+                        } catch (NumberFormatException ignored) {
+                            manager.sendKey(player, "invalidDouble");
+                        }
+                    } else manager.sendKey(player, "idNotExist");
+                } else {
+                    try {
+                        double value = Float.valueOf(args.first());
+                        value = value < min ? min : value > max ? max : value;
+                        consumer.accept(attrib, value);
+                        offerAttrib(stack, attrib);
+                        manager.sendKey(player, "set" + Name, value);
+                        //player.setItemInHand(HandTypes.MAIN_HAND, stack);
+                    } catch (NumberFormatException ignored) {
+                        manager.sendKey(player, "invalidDouble");
+                    }
+                }
+            } else {
+                ItemAttrib attrib = NBTUtil.getAttrib(stack);
+                if (attrib != null) {
+                    if (attrib.globalId > 0) {
+                        ItemAttrib global = getGlobalAttrib(attrib.globalId);
+                        if (global != null) {
+                            manager.sendKey(player, "global.get" + Name, fun.apply(global));
+                        } else manager.sendKey(player, "idNotExist");
+                    } else manager.sendKey(player, "get" + Name, fun.apply(attrib));
+
+                } else manager.sendKey(player, "noAttrib");
+            }
+        } else manager.sendKey(player, "emptyHand");
+    }
+
     private static void getSetInt(AttribManager manager, Player player, Args args, String Name, int min, int max, BiConsumer<ItemAttrib, Integer> consumer, Function<ItemAttrib, Integer> function) {
         ItemStack stack = player.getItemInHand();
         if (stack != null && stack.getType() != Material.AIR) {
@@ -379,7 +527,7 @@ public final class CommandAttrib {
                 try {
                     int value = Integer.valueOf(args.first());
                     value = value < min ? min : value > max ? max : value;
-                    ItemAttrib attrib = createAttrib(stack);
+                    ItemAttrib attrib = NBTUtil.getOrCreateAttrib(stack);
                     player.setItemInHand(stack);
                     consumer.accept(attrib, value);
                     manager.sendKey(player, "set" + Name, value);
@@ -403,7 +551,7 @@ public final class CommandAttrib {
                     int value2 = Integer.valueOf(args.get(1));
                     value1 = value1 < min1 ? min1 : value1 > max1 ? max1 : value1;
                     value2 = value2 < min2 ? min2 : value2 > max2 ? max2 : value2;
-                    ItemAttrib attrib = createAttrib(stack);
+                    ItemAttrib attrib = NBTUtil.getOrCreateAttrib(stack);
                     player.setItemInHand(stack);
                     cs1.accept(attrib, value1);
                     cs2.accept(attrib, value2);
@@ -426,7 +574,7 @@ public final class CommandAttrib {
                 try {
                     float value = Float.valueOf(args.first());
                     value = value < min ? min : value > max ? max : value;
-                    ItemAttrib attrib = createAttrib(stack);
+                    ItemAttrib attrib = NBTUtil.getOrCreateAttrib(stack);
                     player.setItemInHand(stack);
                     consumer.accept(attrib, value);
                     manager.sendKey(player, "set" + Name, value);
@@ -446,7 +594,7 @@ public final class CommandAttrib {
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
                 boolean value = Boolean.valueOf(args.first());
-                ItemAttrib attrib = createAttrib(stack);
+                ItemAttrib attrib = NBTUtil.getOrCreateAttrib(stack);
                 player.setItemInHand(stack);
                 consumer.accept(attrib, value);
                 manager.sendKey(player, "set" + Name, value);
@@ -463,7 +611,7 @@ public final class CommandAttrib {
         if (stack != null && stack.getType() != Material.AIR) {
             if (args.notEmpty()) {
                 String value = args.first();
-                ItemAttrib attrib = createAttrib(stack);
+                ItemAttrib attrib = NBTUtil.getOrCreateAttrib(stack);
                 player.setItemInHand(stack);
                 consumer.accept(attrib, value);
                 manager.sendKey(player, "set" + Name, value);

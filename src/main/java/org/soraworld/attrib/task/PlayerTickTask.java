@@ -4,8 +4,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.soraworld.attrib.data.ItemAttrib;
 import org.soraworld.attrib.data.LoreInfo;
 import org.soraworld.attrib.manager.AttribManager;
+import org.soraworld.attrib.nbt.NBTUtil;
 
 import java.util.UUID;
 
@@ -70,7 +72,7 @@ public class PlayerTickTask extends BukkitRunnable {
                 info = getInfo(stack);
                 if (info.attrib != null && info.canUse(player)) {
                     maxHealth += info.attrib.health;
-                    moveSpeed += info.attrib.walkspeed;
+                    //moveSpeed += info.attrib.walkspeed;
                     knockResist += info.attrib.knock;
                     regain += info.attrib.regain;
                     flyspeed += info.attrib.flyspeed;
@@ -84,7 +86,7 @@ public class PlayerTickTask extends BukkitRunnable {
                     info = getInfo(inventory.getItem(slot));
                     if (info.attrib != null && info.canUse(player)) {
                         maxHealth += info.attrib.health;
-                        moveSpeed += info.attrib.walkspeed;
+                        //moveSpeed += info.attrib.walkspeed;
                         knockResist += info.attrib.knock;
                         regain += info.attrib.regain;
                         flyspeed += info.attrib.flyspeed;
@@ -92,6 +94,8 @@ public class PlayerTickTask extends BukkitRunnable {
                     }
                 }
             }
+
+            ItemAttrib held = NBTUtil.getAttrib(player.getItemInHand());
 
             updateModifier(maxHealth, moveSpeed, attackDamage, knockResist);
 

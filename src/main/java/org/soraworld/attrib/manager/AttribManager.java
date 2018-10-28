@@ -24,7 +24,7 @@ import static org.soraworld.attrib.data.ItemAttrib.serialize;
 public class AttribManager extends SpigotManager {
 
     private final Path itemsFile;
-    private static int NextID = 0;
+    private static int NEXT_ID = 1;
     private HashMap<UUID, PlayerTickTask> tasks = new HashMap<>();
     private static HashMap<String, Integer> names = new HashMap<>();
     private static HashMap<Integer, ItemAttrib> items = new HashMap<>();
@@ -120,23 +120,26 @@ public class AttribManager extends SpigotManager {
         try {
             node.load(false);
             items.clear();
+            int maxId = 0;
             for (String key : node.keys()) {
                 try {
                     int id = Integer.valueOf(key);
+                    if (id <= 0) continue;
                     ItemAttrib attrib = deserialize(node.get(key), id);
                     if (attrib != null) {
-                        items.put(attrib.id, attrib);
+                        items.put(attrib.globalId, attrib);
+                        if (attrib.globalId > maxId) maxId = attrib.globalId;
                         if (attrib.name != null && !attrib.name.isEmpty()) {
-                            names.put(attrib.name, attrib.id);
+                            names.put(attrib.name, attrib.globalId);
                         }
                     }
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
             }
+            NEXT_ID = maxId + 1;
         } catch (Exception e) {
             e.printStackTrace();
-            //saveItems();
         }
     }
 
@@ -346,12 +349,13 @@ public class AttribManager extends SpigotManager {
         updateInfo(stack, info);
     }
 
+/*
     public static ItemAttrib createAttrib(ItemStack stack) {
         LoreInfo info = getInfo(stack);
         if (info.attrib != null) return info.attrib;
-        while (items.containsKey(NextID)) NextID++;
-        ItemAttrib attrib = new ItemAttrib(NextID);
-        items.put(NextID, attrib);
+        while (items.containsKey(NEXT_ID)) NEXT_ID++;
+        ItemAttrib attrib = new ItemAttrib(NEXT_ID);
+        items.put(NEXT_ID, attrib);
         setAttribId(stack, attrib);
         return attrib;
     }
@@ -359,16 +363,17 @@ public class AttribManager extends SpigotManager {
     public static ItemAttrib createAttrib(String id) {
         ItemAttrib attrib = getItemAttrib(id);
         if (attrib != null) return attrib;
-        while (items.containsKey(NextID)) NextID++;
-        attrib = new ItemAttrib(NextID, id);
-        items.put(NextID, attrib);
-        if (attrib.name != null && !attrib.name.isEmpty()) names.put(attrib.name, attrib.id);
+        while (items.containsKey(NEXT_ID)) NEXT_ID++;
+        attrib = new ItemAttrib(NEXT_ID, id);
+        items.put(NEXT_ID, attrib);
+        if (attrib.name != null && !attrib.name.isEmpty()) names.put(attrib.name, attrib.globalId);
         return attrib;
     }
+*/
 
     public static void setAttribName(ItemAttrib attrib, String name) {
         names.remove(attrib.name);
-        if (name != null && !name.isEmpty()) names.put(name, attrib.id);
+        if (name != null && !name.isEmpty()) names.put(name, attrib.globalId);
         attrib.name = name;
     }
 
@@ -479,5 +484,70 @@ public class AttribManager extends SpigotManager {
             }
         }
         return lore;
+    }
+
+    public static boolean hasAttrib(int id) {
+        return items.containsKey(id);
+    }
+
+    public static boolean hasAttrib(String name) {
+        return names.containsKey(name) && items.containsKey(names.get(name));
+    }
+
+    public static ItemAttrib getGlobalAttrib(int globalId) {
+        return items.get(globalId);
+    }
+
+    public static ItemAttrib getOrCreate(int id) {
+        if (id <= 0) return null;
+        return items.computeIfAbsent(id, ItemAttrib::new);
+    }
+
+    public static ItemAttrib getOrCreate(int id, String name) {
+        if (id <= 0) return null;
+        return items.computeIfAbsent(id, integer -> new ItemAttrib(integer, name));
+    }
+
+    public static boolean createAttrib(int id) {
+        if (id <= 0) return false;
+        return createAttrib(id, "");
+    }
+
+    public static boolean createAttrib(int id, String name) {
+        if (id <= 0) return false;
+        if (!items.containsKey(id)) {
+            items.put(id, new ItemAttrib(id, name));
+            return true;
+        }
+        return false;
+    }
+
+    public static ItemAttrib getOrCreate(String name) {
+        return getOrCreate(names.computeIfAbsent(name, s -> NEXT_ID++), name);
+    }
+
+    public static boolean createAttribByName(String name) {
+        if (!names.containsKey(name)) {
+            names.put(name, NEXT_ID);
+            return createAttrib(NEXT_ID++, name);
+        }
+        return createAttrib(names.get(name), name);
+    }
+
+    public static boolean removeAttrib(int id) {
+        if (items.containsKey(id)) {
+            ItemAttrib attrib = items.remove(id);
+            names.remove(attrib.name);
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean removeAttrib(String name) {
+        if (names.containsKey(name)) {
+            items.remove(names.remove(name));
+            return true;
+        }
+        return false;
     }
 }
